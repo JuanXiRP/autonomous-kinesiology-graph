@@ -10,3 +10,6 @@ __pycache__/
 
 # IDE configurations
 .vscode/
+
+media/
+manim.cfg
