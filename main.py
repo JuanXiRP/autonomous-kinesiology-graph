@@ -1,38 +1,87 @@
 # main.py
-import warnings
+# Interactive CLI: type an exercise, pick its variants, generate the chosen ones concurrently.
+import logging
 import os
+import sys
+import warnings
 
-# Suppress internal warnings for a clean console output
+from dotenv import load_dotenv
+
+# Suppress internal library warnings for a clean console output
 warnings.filterwarnings("ignore")
-os.environ["GRPC_VERBOSITY"] = "ERROR"
-os.environ["GLOG_minloglevel"] = "2"
 
-from src.graph import app
+# Load the environment before anything that reads it
+load_dotenv()
 
-def run_pipeline(exercise_name: str):
-    """
-    Executes the LangGraph ETL pipeline and streams the state changes.
-    """
-    print(f"🚀 Starting Generative ETL Pipeline for: '{exercise_name}'\n")
-    
-    initial_state = {
-        "raw_exercise_name": exercise_name,
-        "structured_exercise": None,
-        "image_prompts": [],
-        "validation_errors": [],
-        "generation_attempts": 0
-    }
-    
-    # Run the compiled graph and stream the execution steps
-    final_state = app.invoke(initial_state)
-    
-    if final_state.get("structured_exercise"):
-        print("✅ Pipeline Completed Successfully. Final JSON:")
-        print(final_state["structured_exercise"].model_dump_json(indent=2))
-    else:
-        print("❌ Pipeline failed to generate valid data after max retries.")
-        print(f"Errors: {final_state.get('validation_errors')}")
+from src.cli.prompts import choose_variants, confirm, print_options, print_summary
+from src.infrastructure.db.exercise_repository import existing_slugs, similar_names
+from src.pipeline.batch import run_variants
+from src.resolution.variants import resolve_variants
+
+REQUIRED_ENV = (
+    "GOOGLE_API_KEY",
+    "DATABASE_URL",
+    "SUPABASE_URL",
+    "SUPABASE_KEY",
+)
+
+def missing_env() -> list[str]:
+    """Returns the names of required environment variables that are unset or empty."""
+    return [name for name in REQUIRED_ENV if not os.environ.get(name)]
+
+def interactive(query: str | None = None, input_fn=input) -> None:
+    """Asks for an exercise, offers its variants, and generates the chosen ones concurrently."""
+    missing = missing_env()
+    if missing:
+        print("❌ Missing required environment variables: " + ", ".join(missing))
+        return
+
+    query = (query or input_fn("¿Qué ejercicio quieres generar? ")).strip()
+    if not query:
+        print("Cancelado.")
+        return
+
+    print(f"🔎 Buscando variantes de '{query}'...")
+    try:
+        options = resolve_variants(query)
+    except Exception as e:
+        print(f"❌ No se pudieron obtener las variantes: {e}")
+        return
+    if not options.variants:
+        print("❌ No se encontró ninguna variante para ese ejercicio.")
+        return
+
+    try:
+        existing = existing_slugs([variant.slug for variant in options.variants])
+        db_checked = True
+    except Exception as e:
+        print(f"⚠️ No se pudo consultar la base de datos: {e}")
+        existing, db_checked = {}, False
+
+    listed = {variant.full_name for variant in options.variants}
+    related = [name for name in similar_names(options.variants[0].name) if name not in listed]
+
+    print_options(options, existing, related)
+    selected = choose_variants(options, existing, db_checked, input_fn)
+    if not selected:
+        print("Cancelado: no se generará nada.")
+        return
+
+    print("\nSe van a generar:")
+    for variant in selected:
+        action = "sobrescribir" if variant.slug in existing else "crear"
+        print(f"  - {variant.label_es} ({variant.slug}) → {action}")
+    print(f"Coste aproximado por variante: 2 llamadas a Gemini + ~3 min de render "
+          f"(se ejecutan en paralelo, máximo 2 renders a la vez).")
+    if not confirm("¿Generar?", input_fn):
+        print("Cancelado.")
+        return
+
+    results = run_variants(selected, set(existing))
+    print_summary(results)
 
 if __name__ == "__main__":
-    # Test with a compound exercise
-    run_pipeline("Romanian Deadlift")
+    logging.basicConfig(level=logging.INFO, format="%(threadName)s | %(message)s")
+    # Usage: python main.py                      -> asks for the exercise
+    #        python main.py "peso muerto rumano" -> same, with the request prefilled
+    interactive(" ".join(sys.argv[1:]) or None)

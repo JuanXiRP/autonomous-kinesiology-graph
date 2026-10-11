@@ -13,3 +13,7 @@ __pycache__/
 
 media/
 manim.cfg
+
+google-credentials.json
+
+CLAUDE.md

@@ -14,7 +14,7 @@ def save_to_database(state: GraphState) -> dict:
     db_url = os.environ.get("DATABASE_URL")
     
     try:
-        print(f"\n[DB Agent] 💾 Guardando '{exercise.slug}' en Supabase...")
+        print(f"\n[DB Agent] 💾 Saving '{exercise.slug}' to Supabase...")
         
         with psycopg.connect(db_url) as conn:
             with conn.cursor() as cur:
@@ -30,14 +30,18 @@ def save_to_database(state: GraphState) -> dict:
                     )
                     ON CONFLICT (slug) DO UPDATE SET
                         name = EXCLUDED.name,
+                        force = EXCLUDED.force,
+                        mechanic = EXCLUDED.mechanic,
+                        equipment = EXCLUDED.equipment,
+                        category = EXCLUDED.category,
                         primary_muscles = EXCLUDED.primary_muscles,
                         secondary_muscles = EXCLUDED.secondary_muscles,
                         preparation = EXCLUDED.preparation,
                         execution_steps = EXCLUDED.execution_steps,
                         breathing = EXCLUDED.breathing,
                         common_mistakes = EXCLUDED.common_mistakes,
-                        images = EXCLUDED.images,
-                        animation_video = EXCLUDED.animation_video,
+                        images = CASE WHEN cardinality(EXCLUDED.images) > 0 THEN EXCLUDED.images ELSE exercises.images END,
+                        animation_video = COALESCE(EXCLUDED.animation_video, exercises.animation_video),
                         updated_at = CURRENT_TIMESTAMP
                     RETURNING id;
                 """
@@ -57,11 +61,11 @@ def save_to_database(state: GraphState) -> dict:
             # Commit the transaction
             conn.commit()
             
-        print(f"[DB Agent] ✅ Transacción completada! DB_ID: {inserted_id}\n")
+        print(f"[DB Agent] ✅ Transaction completed! DB_ID: {inserted_id}\n")
         
         return {} 
         
     except Exception as e:
         error_msg = f"Database insertion failed: {str(e)}"
-        print(f"\n❌ [DB Agent] ERRO CRÍTICO: {error_msg}\n")
+        print(f"\n❌ [DB Agent] CRITICAL ERROR: {error_msg}\n")
         return {"validation_errors": [error_msg]}

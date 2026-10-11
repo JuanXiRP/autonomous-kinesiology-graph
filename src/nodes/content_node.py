@@ -1,5 +1,4 @@
 # src/nodes/content_node.py
-import os
 from dotenv import load_dotenv
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_core.prompts import ChatPromptTemplate
@@ -12,6 +11,10 @@ load_dotenv()
 def generate_exercise_content(state: GraphState) -> dict:
     exercise_name = state.get("raw_exercise_name")
     attempts = state.get("generation_attempts", 0)
+    variant = state.get("variant")
+    if variant is not None:
+        exercise_name = (f"{variant.full_name}. Generate exactly this variant: "
+                         f"name '{variant.name}', equipment '{variant.equipment.value}'")
     
     # Using the stable 'flash' version to avoid 404 errors.
     llm = ChatGoogleGenerativeAI(
@@ -39,7 +42,16 @@ def generate_exercise_content(state: GraphState) -> dict:
     
     try:
         result = chain.invoke({"exercise_name": exercise_name})
-        
+
+        # The media fields are part of the LLM schema; discard anything it invented
+        result.images = []
+        result.animation_video = None
+
+        # Pin the chosen variant so the slug is exactly the one checked in the database
+        if variant is not None:
+            result = ExerciseModel.model_validate(
+                {**result.model_dump(), "name": variant.name, "equipment": variant.equipment})
+
         return {
             "structured_exercise": result,
             "generation_attempts": attempts + 1

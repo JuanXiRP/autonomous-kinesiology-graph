@@ -26,6 +26,17 @@ class CategoryType(StrEnum):
     STRETCHING = "stretching"
     PLYOMETRICS = "plyometrics"
 
+def display_name(name: str, equipment: "EquipmentType") -> str:
+    """Base name plus the equipment in brackets, e.g. 'Romanian Deadlift (Barbell)'."""
+    formatted_equipment = f"({equipment.value.capitalize()})"
+    if name.endswith(formatted_equipment):
+        return name
+    return f"{name.strip()} {formatted_equipment}"
+
+def make_slug(name: str, equipment: "EquipmentType") -> str:
+    """Upsert key and Storage folder. Changing this rule orphans existing rows and files."""
+    return display_name(name, equipment).replace('(', '').replace(')', '').replace(' ', '_').lower()
+
 class ExerciseModel(BaseModel):
     name: str = Field(description="The standard base name of the exercise WITHOUT the equipment type.")
     slug: str = Field(description="URL-friendly version of the name, lowercase with underscores.")
@@ -49,13 +60,9 @@ class ExerciseModel(BaseModel):
     @model_validator(mode='after')
     def append_equipment_to_name(self) -> 'ExerciseModel':
         # Append equipment to name to ensure uniqueness and consistency
-        formatted_equipment = f"({self.equipment.value.capitalize()})"
-        
-        if not self.name.endswith(formatted_equipment):
-            self.name = f"{self.name.strip()} {formatted_equipment}"
-            
+        self.name = display_name(self.name, self.equipment)
+
         # Ensure slug matches the final sanitized name
-        clean_name_for_slug = self.name.replace('(', '').replace(')', '').replace(' ', '_').lower()
-        self.slug = clean_name_for_slug
+        self.slug = make_slug(self.name, self.equipment)
         
         return self
