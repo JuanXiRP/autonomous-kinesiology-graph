@@ -1,5 +1,6 @@
 from langchain_core.runnables import RunnableLambda
 
+from src.domain.animation import MovementFamily
 from src.domain.models import EquipmentType
 from src.resolution import variants
 from src.resolution.variants import ExerciseVariant, VariantOptions
@@ -40,3 +41,20 @@ def test_resolver_removes_duplicate_slugs(monkeypatch):
 
     # Assert
     assert [v.slug for v in result.variants] == ["romanian_deadlift_barbell", "romanian_deadlift_dumbbell"]
+
+
+def test_movement_family_defaults_to_other():
+    # Arrange / Act
+    variant = make_variant()
+
+    # Assert
+    assert variant.movement_family == MovementFamily.OTHER
+
+
+def test_movement_family_is_parsed():
+    # Arrange / Act
+    variant = ExerciseVariant(name="Bench Press", equipment=EquipmentType.BARBELL, label_es="Press banca (barra)",
+                              note_es="Clásico.", movement_family="horizontal_press")
+
+    # Assert
+    assert variant.movement_family == MovementFamily.HORIZONTAL_PRESS

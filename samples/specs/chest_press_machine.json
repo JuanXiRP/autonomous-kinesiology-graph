@@ -1,0 +1,64 @@
+{
+  "subtitle": "Machine horizontal press",
+  "setup": {"posture": "seated", "support": "seat_with_backrest", "support_angle_deg": 85, "rig": "machine_lever", "fixed_contacts": ["near_foot"]},
+  "load_attachment": "hands",
+  "balance_over_midfoot": false,
+  "reps": 2,
+  "keyframes": [
+    {
+      "torso": 95,
+      "near_arm": {"target": {"angle_deg": 330, "reach": 0.36}},
+      "near_leg": {"proximal": 350, "distal": 275},
+      "duration_s": 1.0, "hold_s": 0.5, "active_step": 0,
+      "muscle_activation": [
+        {"region": "chest", "level": 0.55}, {"region": "shoulders", "level": 0.35}, {"region": "triceps", "level": 0.25}
+      ]
+    },
+    {
+      "torso": 95,
+      "near_arm": {"target": {"angle_deg": 345, "reach": 0.7}},
+      "near_leg": {"proximal": 350, "distal": 275},
+      "duration_s": 0.9, "hold_s": 0.0, "active_step": 1,
+      "muscle_activation": [
+        {"region": "chest", "level": 0.85}, {"region": "shoulders", "level": 0.5}, {"region": "triceps", "level": 0.6}
+      ]
+    },
+    {
+      "torso": 95,
+      "near_arm": {"target": {"angle_deg": 352, "reach": 0.95}},
+      "near_leg": {"proximal": 350, "distal": 275},
+      "duration_s": 0.7, "hold_s": 0.4, "active_step": 1,
+      "muscle_activation": [
+        {"region": "chest", "level": 1.0}, {"region": "shoulders", "level": 0.45}, {"region": "triceps", "level": 0.85}
+      ]
+    },
+    {
+      "torso": 95,
+      "near_arm": {"target": {"angle_deg": 345, "reach": 0.7}},
+      "near_leg": {"proximal": 350, "distal": 275},
+      "duration_s": 1.0, "hold_s": 0.0, "active_step": 2,
+      "muscle_activation": [
+        {"region": "chest", "level": 0.75}, {"region": "shoulders", "level": 0.45}, {"region": "triceps", "level": 0.5}
+      ]
+    },
+    {
+      "torso": 95,
+      "near_arm": {"target": {"angle_deg": 330, "reach": 0.36}},
+      "near_leg": {"proximal": 350, "distal": 275},
+      "duration_s": 1.0, "hold_s": 0.4, "active_step": 2,
+      "muscle_activation": [
+        {"region": "chest", "level": 0.55}, {"region": "shoulders", "level": 0.35}, {"region": "triceps", "level": 0.25}
+      ]
+    }
+  ],
+  "steps": [
+    {"title": "Set the seat", "description": "Handles at mid-chest height, back flat on the pad, feet planted."},
+    {"title": "Press forward", "description": "Drive the handles forward until the elbows are almost straight."},
+    {"title": "Slow return", "description": "Bring the handles back under control to a comfortable chest stretch."}
+  ],
+  "force_vectors": [
+    {"kind": "load", "anchor": "load", "angle_deg": 180, "magnitude": 0.8, "label": "Resistance", "active_steps": [2]},
+    {"kind": "muscle_pull", "anchor": "load", "angle_deg": 0, "magnitude": 0.9, "label": "Press", "active_steps": [1]}
+  ],
+  "angle_markers": ["elbow"]
+}

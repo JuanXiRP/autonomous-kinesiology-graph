@@ -1,0 +1,54 @@
+{
+  "subtitle": "Bodyweight trunk flexion",
+  "setup": {"posture": "supine", "support": "none", "support_angle_deg": 0, "rig": "free", "fixed_contacts": ["near_foot"]},
+  "load_attachment": "none",
+  "balance_over_midfoot": false,
+  "reps": 2,
+  "keyframes": [
+    {
+      "torso": 180,
+      "near_arm": {"target": {"angle_deg": 170, "reach": 0.35}},
+      "near_leg": {"proximal": 42, "distal": 292},
+      "duration_s": 1.0, "hold_s": 0.4, "active_step": 0,
+      "muscle_activation": [
+        {"region": "abs", "level": 0.3}
+      ]
+    },
+    {
+      "torso": 160,
+      "near_arm": {"target": {"angle_deg": 150, "reach": 0.35}},
+      "near_leg": {"proximal": 42, "distal": 292},
+      "duration_s": 0.7, "hold_s": 0.0, "active_step": 1,
+      "muscle_activation": [
+        {"region": "abs", "level": 0.75}
+      ]
+    },
+    {
+      "torso": 148,
+      "near_arm": {"target": {"angle_deg": 138, "reach": 0.35}},
+      "near_leg": {"proximal": 42, "distal": 292},
+      "duration_s": 0.5, "hold_s": 0.5, "active_step": 1,
+      "muscle_activation": [
+        {"region": "abs", "level": 1.0}
+      ]
+    },
+    {
+      "torso": 180,
+      "near_arm": {"target": {"angle_deg": 170, "reach": 0.35}},
+      "near_leg": {"proximal": 42, "distal": 292},
+      "duration_s": 1.1, "hold_s": 0.3, "active_step": 2,
+      "muscle_activation": [
+        {"region": "abs", "level": 0.3}
+      ]
+    }
+  ],
+  "steps": [
+    {"title": "Set the position", "description": "Lie on the back, knees bent, fingertips lightly at the temples."},
+    {"title": "Curl the trunk", "description": "Lift the shoulder blades by flexing the spine, lower back down."},
+    {"title": "Lower slowly", "description": "Roll back down vertebra by vertebra."}
+  ],
+  "force_vectors": [
+    {"kind": "muscle_pull", "anchor": "shoulder", "angle_deg": 60, "magnitude": 0.8, "label": "Curl up", "active_steps": [1]}
+  ],
+  "angle_markers": ["hip"]
+}

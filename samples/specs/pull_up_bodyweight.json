@@ -1,0 +1,56 @@
+{
+  "subtitle": "Bodyweight vertical pull",
+  "setup": {"posture": "hanging", "support": "pull_up_bar", "support_angle_deg": 0, "rig": "free", "fixed_contacts": []},
+  "load_attachment": "none",
+  "balance_over_midfoot": false,
+  "reps": 2,
+  "keyframes": [
+    {
+      "torso": 92,
+      "near_arm": {"target": {"angle_deg": 92, "reach": 0.98}},
+      "near_leg": {"proximal": 292, "distal": 222},
+      "duration_s": 1.0, "hold_s": 0.4, "active_step": 0,
+      "muscle_activation": [
+        {"region": "lats", "level": 0.5}, {"region": "forearms", "level": 0.7}, {"region": "abs", "level": 0.3}
+      ]
+    },
+    {
+      "torso": 95,
+      "near_arm": {"target": {"angle_deg": 85, "reach": 0.62}},
+      "near_leg": {"proximal": 292, "distal": 222},
+      "duration_s": 0.9, "hold_s": 0.0, "active_step": 1,
+      "muscle_activation": [
+        {"region": "lats", "level": 0.85}, {"region": "upper_back", "level": 0.7}, {"region": "biceps", "level": 0.7}, {"region": "forearms", "level": 0.7}
+      ]
+    },
+    {
+      "torso": 98,
+      "near_arm": {"target": {"angle_deg": 78, "reach": 0.33}},
+      "near_leg": {"proximal": 292, "distal": 222},
+      "duration_s": 0.6, "hold_s": 0.5, "active_step": 2,
+      "muscle_activation": [
+        {"region": "lats", "level": 1.0}, {"region": "upper_back", "level": 0.9}, {"region": "biceps", "level": 0.85}, {"region": "forearms", "level": 0.7}
+      ]
+    },
+    {
+      "torso": 92,
+      "near_arm": {"target": {"angle_deg": 92, "reach": 0.98}},
+      "near_leg": {"proximal": 292, "distal": 222},
+      "duration_s": 1.3, "hold_s": 0.3, "active_step": 3,
+      "muscle_activation": [
+        {"region": "lats", "level": 0.5}, {"region": "forearms", "level": 0.7}, {"region": "abs", "level": 0.3}
+      ]
+    }
+  ],
+  "steps": [
+    {"title": "Dead hang", "description": "Overhand grip, arms long, ribs down, legs together."},
+    {"title": "Pull the elbows down", "description": "Start by depressing the shoulder blades, then bend the elbows."},
+    {"title": "Chin over the bar", "description": "Chest towards the bar, no kicking."},
+    {"title": "Lower fully", "description": "Control the descent back to straight arms."}
+  ],
+  "force_vectors": [
+    {"kind": "muscle_pull", "anchor": "elbow", "angle_deg": 270, "magnitude": 0.8, "label": "Elbows down", "active_steps": [1, 2]},
+    {"kind": "load", "anchor": "hip", "angle_deg": 270, "magnitude": 0.8, "label": "Bodyweight", "active_steps": [3]}
+  ],
+  "angle_markers": ["elbow"]
+}

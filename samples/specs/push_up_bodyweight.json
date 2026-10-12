@@ -1,0 +1,56 @@
+{
+  "subtitle": "Bodyweight horizontal press",
+  "setup": {"posture": "plank", "support": "none", "support_angle_deg": 0, "rig": "free", "fixed_contacts": ["near_hand"]},
+  "load_attachment": "none",
+  "balance_over_midfoot": false,
+  "reps": 2,
+  "keyframes": [
+    {
+      "torso": 17,
+      "near_arm": {"target": {"angle_deg": 268, "reach": 0.99}},
+      "near_leg": {"proximal": 197, "distal": 197},
+      "duration_s": 1.0, "hold_s": 0.4, "active_step": 0,
+      "muscle_activation": [
+        {"region": "chest", "level": 0.4}, {"region": "triceps", "level": 0.4}, {"region": "abs", "level": 0.6}, {"region": "shoulders", "level": 0.3}
+      ]
+    },
+    {
+      "torso": 13,
+      "near_arm": {"target": {"angle_deg": 268, "reach": 0.99}},
+      "near_leg": {"proximal": 193, "distal": 193},
+      "duration_s": 0.9, "hold_s": 0.0, "active_step": 1,
+      "muscle_activation": [
+        {"region": "chest", "level": 0.7}, {"region": "triceps", "level": 0.5}, {"region": "abs", "level": 0.6}, {"region": "shoulders", "level": 0.5}
+      ]
+    },
+    {
+      "torso": 8,
+      "near_arm": {"target": {"angle_deg": 268, "reach": 0.99}},
+      "near_leg": {"proximal": 188, "distal": 188},
+      "duration_s": 0.6, "hold_s": 0.4, "active_step": 2,
+      "muscle_activation": [
+        {"region": "chest", "level": 1.0}, {"region": "triceps", "level": 0.6}, {"region": "abs", "level": 0.6}, {"region": "shoulders", "level": 0.6}
+      ]
+    },
+    {
+      "torso": 17,
+      "near_arm": {"target": {"angle_deg": 268, "reach": 0.99}},
+      "near_leg": {"proximal": 197, "distal": 197},
+      "duration_s": 0.9, "hold_s": 0.3, "active_step": 3,
+      "muscle_activation": [
+        {"region": "chest", "level": 0.6}, {"region": "triceps", "level": 0.9}, {"region": "abs", "level": 0.6}, {"region": "shoulders", "level": 0.4}
+      ]
+    }
+  ],
+  "steps": [
+    {"title": "Rigid plank", "description": "Hands under the shoulders, glutes and abs tight, body in a line."},
+    {"title": "Lower as one piece", "description": "Elbows about 45° from the body, hips stay level."},
+    {"title": "Chest near the floor", "description": "Stop a fist above the floor without sagging."},
+    {"title": "Press away", "description": "Push the floor away to straight arms."}
+  ],
+  "force_vectors": [
+    {"kind": "muscle_pull", "anchor": "shoulder", "angle_deg": 90, "magnitude": 0.8, "label": "Press", "active_steps": [3]},
+    {"kind": "load", "anchor": "hip", "angle_deg": 270, "magnitude": 0.8, "label": "Bodyweight", "active_steps": [1, 2]}
+  ],
+  "angle_markers": ["elbow"]
+}

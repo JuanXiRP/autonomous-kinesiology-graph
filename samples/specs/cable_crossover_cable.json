@@ -1,0 +1,57 @@
+{
+  "subtitle": "Cable chest fly",
+  "view": "front",
+  "setup": {"posture": "standing", "support": "none", "support_angle_deg": 0, "rig": "cable", "cable": {"height": "high", "side": "front"}, "fixed_contacts": []},
+  "load_attachment": "hands",
+  "balance_over_midfoot": false,
+  "reps": 2,
+  "keyframes": [
+    {
+      "torso": 90,
+      "near_arm": {"target": {"angle_deg": 18, "reach": 0.94}},
+      "near_leg": {"proximal": 270, "distal": 270},
+      "duration_s": 1.0, "hold_s": 0.4, "active_step": 0,
+      "muscle_activation": [
+        {"region": "chest", "level": 0.45}, {"region": "shoulders", "level": 0.35}
+      ]
+    },
+    {
+      "torso": 90,
+      "near_arm": {"target": {"angle_deg": 300, "reach": 0.86}},
+      "near_leg": {"proximal": 270, "distal": 270},
+      "duration_s": 0.8, "hold_s": 0.0, "active_step": 1,
+      "muscle_activation": [
+        {"region": "chest", "level": 0.8}, {"region": "shoulders", "level": 0.5}
+      ]
+    },
+    {
+      "torso": 90,
+      "near_arm": {"target": {"angle_deg": 250, "reach": 0.76}},
+      "near_leg": {"proximal": 270, "distal": 270},
+      "duration_s": 0.6, "hold_s": 0.5, "active_step": 2,
+      "muscle_activation": [
+        {"region": "chest", "level": 1.0}, {"region": "shoulders", "level": 0.5}, {"region": "abs", "level": 0.3}
+      ]
+    },
+    {
+      "torso": 90,
+      "near_arm": {"target": {"angle_deg": 18, "reach": 0.94}},
+      "near_leg": {"proximal": 270, "distal": 270},
+      "duration_s": 1.2, "hold_s": 0.3, "active_step": 3,
+      "muscle_activation": [
+        {"region": "chest", "level": 0.45}, {"region": "shoulders", "level": 0.35}
+      ]
+    }
+  ],
+  "steps": [
+    {"title": "Arms wide", "description": "Handles high and wide, soft elbows, chest up."},
+    {"title": "Hug the arc", "description": "Sweep the hands down and in on a wide arc."},
+    {"title": "Squeeze together", "description": "Hands meet in front of the hips, squeeze the chest."},
+    {"title": "Open back up", "description": "Let the arms return slowly to the stretch."}
+  ],
+  "force_vectors": [
+    {"kind": "muscle_pull", "anchor": "wrist", "angle_deg": 225, "magnitude": 0.8, "label": "Adduct", "active_steps": [1, 2]},
+    {"kind": "load", "anchor": "load", "angle_deg": 40, "magnitude": 0.7, "label": "Cable", "active_steps": [3]}
+  ],
+  "angle_markers": ["shoulder"]
+}

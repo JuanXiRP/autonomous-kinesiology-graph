@@ -1,0 +1,55 @@
+{
+  "subtitle": "Cable vertical pull",
+  "setup": {"posture": "seated", "support": "seat", "support_angle_deg": 0, "rig": "cable", "cable": {"height": "high", "side": "above"}, "fixed_contacts": ["near_foot"]},
+  "load_attachment": "hands",
+  "balance_over_midfoot": false,
+  "reps": 2,
+  "keyframes": [
+    {
+      "torso": 95,
+      "near_arm": {"target": {"angle_deg": 96, "reach": 0.98}},
+      "near_leg": {"proximal": 350, "distal": 280},
+      "duration_s": 1.0, "hold_s": 0.4, "active_step": 0,
+      "muscle_activation": [
+        {"region": "lats", "level": 0.5}, {"region": "upper_back", "level": 0.3}, {"region": "forearms", "level": 0.5}
+      ]
+    },
+    {
+      "torso": 100,
+      "near_arm": {"target": {"angle_deg": 70, "reach": 0.6}},
+      "near_leg": {"proximal": 350, "distal": 280},
+      "duration_s": 0.8, "hold_s": 0.0, "active_step": 1,
+      "muscle_activation": [
+        {"region": "lats", "level": 0.85}, {"region": "upper_back", "level": 0.6}, {"region": "biceps", "level": 0.6}, {"region": "forearms", "level": 0.5}
+      ]
+    },
+    {
+      "torso": 102,
+      "near_arm": {"target": {"angle_deg": 42, "reach": 0.36}},
+      "near_leg": {"proximal": 350, "distal": 280},
+      "duration_s": 0.5, "hold_s": 0.5, "active_step": 1,
+      "muscle_activation": [
+        {"region": "lats", "level": 1.0}, {"region": "upper_back", "level": 0.8}, {"region": "biceps", "level": 0.75}, {"region": "forearms", "level": 0.5}
+      ]
+    },
+    {
+      "torso": 95,
+      "near_arm": {"target": {"angle_deg": 96, "reach": 0.98}},
+      "near_leg": {"proximal": 350, "distal": 280},
+      "duration_s": 1.3, "hold_s": 0.3, "active_step": 2,
+      "muscle_activation": [
+        {"region": "lats", "level": 0.5}, {"region": "upper_back", "level": 0.3}, {"region": "forearms", "level": 0.5}
+      ]
+    }
+  ],
+  "steps": [
+    {"title": "Grip and settle", "description": "Wide grip, thighs locked under the pad, slight lean back."},
+    {"title": "Pull to upper chest", "description": "Drive the elbows down to the ribs, bar to the collarbones."},
+    {"title": "Return overhead", "description": "Let the bar rise until the arms are straight, lats stretched."}
+  ],
+  "force_vectors": [
+    {"kind": "muscle_pull", "anchor": "elbow", "angle_deg": 270, "magnitude": 0.8, "label": "Elbows down", "active_steps": [1]},
+    {"kind": "load", "anchor": "load", "angle_deg": 90, "magnitude": 0.8, "label": "Cable", "active_steps": [2]}
+  ],
+  "angle_markers": ["elbow", "shoulder"]
+}

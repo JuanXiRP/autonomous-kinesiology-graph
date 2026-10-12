@@ -9,7 +9,7 @@ from src.rendering.runner import extract_still, render_animation
 def render_exercise_animation(state: GraphState) -> dict:
     """Renders the animation spec with Manim into a video plus a still frame."""
     exercise = state.get("structured_exercise")
-    spec = state.get("animation_spec")
+    spec = state.get("animation_spec") or state.get("fallback_spec")
 
     if not exercise:
         return {"validation_errors": ["RenderNode failed: No exercise data."]}
@@ -18,7 +18,15 @@ def render_exercise_animation(state: GraphState) -> dict:
 
     video_path = Path("media/videos") / f"{exercise.slug}_generative.mp4"
     image_path = Path("media/images") / f"{exercise.slug}.png"
+    spec_path = Path("media/specs") / f"{exercise.slug}.json"
     errors: list[str] = []
+
+    # Keep the spec next to the media so it can be re-rendered for free with render_spec.py
+    try:
+        spec_path.parent.mkdir(parents=True, exist_ok=True)
+        spec_path.write_text(spec.model_dump_json(indent=2), encoding="utf-8")
+    except OSError as e:
+        logging.warning(f"[RenderNode] Could not save the spec: {e}")
 
     # Never pick up stale output from an earlier run
     video_path.unlink(missing_ok=True)

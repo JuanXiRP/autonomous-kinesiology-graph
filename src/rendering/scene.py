@@ -9,16 +9,19 @@ from pathlib import Path
 
 import numpy as np
 from manim import (
-    Arc, Arrow, Circle, DashedVMobject, DOWN, LEFT, Line, RIGHT, Scene, SurroundingRectangle, Text,
-    VGroup, VMobject, ValueTracker, always_redraw, linear, RoundedRectangle, Dot, BOLD, SEMIBOLD,
+    Arc, Arrow, Circle, DashedVMobject, DOWN, LEFT, Line, Polygon, RIGHT, Scene, SurroundingRectangle, Text,
+    VGroup, VMobject, ValueTracker, always_redraw, config, linear, RoundedRectangle, Dot, BOLD, SEMIBOLD,
 )
 
 from src.rendering import palette as art
-from src.domain.animation import AnchorKind, AnimationSpec, BodyPoint, ForceKind, JointName, PropKind
-from src.rendering import body, layout
+from src.domain.animation import AnimationSpec, BodyPoint, ForceKind, JointName, Posture, RigKind, View
+from src.rendering import body, body_front, layout
+from src.rendering import kinematics as kin
+from src.rendering import scenery as scn
 from src.rendering import skeleton as sk
 
 PANEL_LEFT, PANEL_RIGHT = -6.5, -1.8
+REP_COUNTER_BOX = layout.Box(5.45, 3.4, 1.3, 0.45)
 PLATE_RADIUS = 0.55
 
 FORCE_COLORS = {
@@ -28,6 +31,36 @@ FORCE_COLORS = {
 }
 
 p3 = body.p3
+
+PAD_COLOR = "#5E6E66"
+PAD_EDGE = "#46544D"
+FRAME_COLOR = "#8A9A93"
+RAIL_COLOR = "#A9B6AF"
+CABLE_COLOR = "#7D8C85"
+
+def draw_part(part: scn.Part) -> list:
+    """Manim shapes of one scenery part (see scenery.Part)."""
+    a, b = p3(part.a), p3(part.b)
+    if part.kind == "pad":
+        return [Line(a, b, stroke_width=part.width * 62, color=PAD_EDGE),
+                Line(a, b, stroke_width=part.width * 50, color=PAD_COLOR)]
+    if part.kind in ("frame", "rail"):
+        color = RAIL_COLOR if part.kind == "rail" else FRAME_COLOR
+        return [Line(a, b, stroke_width=part.width * 60, color=color)]
+    if part.kind == "block":
+        corners = [a, p3((part.b[0], part.a[1])), b, p3((part.a[0], part.b[1]))]
+        return [Polygon(*corners, color=FRAME_COLOR, stroke_width=2, fill_color="#C9D3CE", fill_opacity=1)]
+    if part.kind == "bar":
+        return [Circle(radius=part.width, color="#2E2E2E", stroke_width=2, fill_color=art.EQUIPMENT_COLOR,
+                       fill_opacity=1).move_to(a)]
+    if part.kind == "pulley":
+        return [Circle(radius=part.width, color="#2E2E2E", stroke_width=2, fill_color="#BFC5C2", fill_opacity=1).move_to(a),
+                Circle(radius=0.04, color="#2E2E2E", fill_color="#2E2E2E", fill_opacity=1).move_to(a)]
+    if part.kind == "cable":
+        return [Line(a, b, stroke_width=3, color=CABLE_COLOR)]
+    if part.kind in ("lever", "plate"):
+        return [Line(a, b, stroke_width=part.width * 60, color=art.EQUIPMENT_COLOR)]
+    return []
 
 class ExerciseScene(Scene):
     def construct(self):
@@ -39,7 +72,8 @@ class ExerciseScene(Scene):
         self.time_tracker = ValueTracker(0.0)
         self._text_cache = {}
         self._label_memory = {}
-        self.hand_y = sk.hand_anchor_y(self.spec)
+        self.solver = kin.Solver(self.spec)
+        self.scenery = scn.build_scenery(self.spec, self.solver, self.equipment)
 
         self.build_panel()
         self.build_scenery()
@@ -55,6 +89,14 @@ class ExerciseScene(Scene):
             self.wait(0.1)
             return
 
+        storyboard = os.environ.get("EXERCISE_STORYBOARD")
+        if storyboard:  # one video frame per requested time (visual review)
+            for value in storyboard.split(","):
+                self.time_tracker.set_value(float(value))
+                self.update_mobjects(0)
+                self.wait(1 / config.frame_rate, frozen_frame=True)
+            return
+
         total = sk.total_duration(self.spec)
         self.wait(0.3)
         self.play(self.time_tracker.animate.set_value(total), run_time=total, rate_func=linear)
@@ -66,7 +108,7 @@ class ExerciseScene(Scene):
         return sk.frame_at(self.spec, self.time_tracker.get_value())
 
     def solve(self, pose: sk.Pose) -> dict[str, np.ndarray]:
-        return sk.solve(pose, self.spec.anchor, self.hand_y)
+        return self.solver.solve(pose)
 
     def text(self, content: str, font_size: int, color: str, weight=None) -> Text:
         """Pango layout is slow: build each distinct label once and hand out copies."""
@@ -77,7 +119,7 @@ class ExerciseScene(Scene):
         return self._text_cache[key].copy()
 
     def load_position(self, points: dict[str, np.ndarray]) -> np.ndarray | None:
-        return sk.load_point(points, self.spec.load_attachment.value)
+        return self.solver.load(points)
 
     # ---- static layers -----------------------------------------------------------------------
 
@@ -129,26 +171,11 @@ class ExerciseScene(Scene):
         self.add(title_group, divider, steps_group, highlight, legend_tag, legend_content)
 
     def build_scenery(self):
-        first_points = self.solve(sk.Pose.from_keyframe(self.spec.keyframes[0]))
-        if self.spec.anchor == AnchorKind.FEET:
-            self.add(Line([0.3, sk.FLOOR_Y, 0], [6.9, sk.FLOOR_Y, 0], stroke_width=3, color=art.LIGHT_LINE))
-
-        for prop in self.spec.props:
-            if prop.kind == PropKind.BENCH:
-                xs = [first_points[k][0] for k in ("hip", "shoulder", "head")]
-                top = min(first_points["hip"][1], first_points["shoulder"][1]) - 0.3
-                left, right = min(xs) - 0.4, max(xs) + 0.4
-                self.add(Line([left, top, 0], [right, top, 0], stroke_width=14, color="#8A9A93"))
-                for x in (left + 0.2, right - 0.2):
-                    self.add(Line([x, top, 0], [x, sk.FLOOR_Y, 0], stroke_width=6, color="#8A9A93"))
-            elif prop.kind == PropKind.FIXED_BAR:
-                x, y = sk.HANDS_ANCHOR_X, self.hand_y
-                self.add(Line([x - 1.3, y + 0.12, 0], [x + 1.3, y + 0.12, 0], stroke_width=8, color=art.EQUIPMENT_COLOR))
-                for dx in (-1.3, 1.3):
-                    self.add(Line([x + dx, y + 0.12, 0], [x + dx, y + 1.0, 0], stroke_width=5, color=art.LIGHT_LINE))
-            elif prop.kind == PropKind.CABLE_ANCHOR:
-                position = [sk.FEET_ANCHOR_X + prop.x, sk.FLOOR_Y + prop.y, 0]
-                self.add(Circle(radius=0.12, color=art.EQUIPMENT_COLOR, fill_color=art.EQUIPMENT_COLOR, fill_opacity=1).move_to(position))
+        if self.solver.floor_visible:
+            floor = self.solver.floor_y
+            self.add(Line([0.3, floor, 0], [6.9, floor, 0], stroke_width=3, color=art.LIGHT_LINE))
+        for part in self.scenery.parts:
+            self.add(*draw_part(part))
 
     def build_bar_path(self):
         if self.spec.load_attachment.value == "none":
@@ -173,14 +200,17 @@ class ExerciseScene(Scene):
     def build_dynamic(self):
         frame = self.current_frame()
         points = self.solve(frame.pose)
-        obstacles = body.body_obstacles(points)
-        load_shapes, load_obstacle = self.draw_load(points)
-        if load_obstacle is not None:
-            obstacles.append(load_obstacle)
-        taken: list[layout.Box] = []
+        front = self.spec.view == View.FRONT
+        obstacles = body_front.body_obstacles(points) if front else body.body_obstacles(points)
+        load_shapes, load_obstacles = self.draw_loads(points)
+        obstacles.extend(load_obstacles)
+        taken: list[layout.Box] = [REP_COUNTER_BOX]  # labels never cover the rep counter
 
         group = VGroup()
-        group.add(*body.build_body(points, frame.activation))
+        for part in scn.moving_parts(self.spec, self.scenery, self.load_position(points), self.solver.loads(points)):
+            group.add(*draw_part(part))
+        group.add(*(body_front.build_front_body(points, frame.activation) if front
+                    else body.build_body(points, frame.activation)))
         group.add(*load_shapes)
         group.add(*self.draw_forces(points, frame, obstacles, taken))
         group.add(*self.draw_angle_markers(points, obstacles, taken))
@@ -200,16 +230,45 @@ class ExerciseScene(Scene):
         text.move_to(chip.get_center())
         return [chip, text]
 
-    def draw_load(self, points):
-        """Equipment shapes plus the obstacle they occupy (for label placement)."""
-        position = self.load_position(points)
-        if position is None:
-            return [], None
+    def draw_loads(self, points):
+        """Equipment at every loaded hand/foot, plus the obstacles they occupy (for label placement)."""
+        loads = self.solver.loads(points)
+        if self.spec.view == View.FRONT and self.equipment == "barbell" and len(loads) == 2:
+            return self.draw_front_barbell(points)
+        shapes, obstacles = [], []
+        for _, position in loads:
+            drawn, obstacle = self.draw_load(position)
+            shapes += drawn
+            obstacles.append(obstacle)
+        return shapes, obstacles
+
+    def draw_front_barbell(self, points):
+        """A barbell seen from the front: the bar across both hands with plates at the ends."""
+        a, b = points["far_wrist"], points["near_wrist"]
+        along = (b - a) / np.linalg.norm(b - a)
+        ends = (a - along * 0.9, b + along * 0.9)
+        shapes = [Line(p3(ends[0]), p3(ends[1]), stroke_width=7, color=art.EQUIPMENT_COLOR)]
+        across = np.array([-along[1], along[0]])
+        for end, inward in ((ends[0], along), (ends[1], -along)):
+            for offset in (0.08, 0.2):
+                centre = end + inward * offset
+                shapes.append(Line(p3(centre - across * PLATE_RADIUS), p3(centre + across * PLATE_RADIUS),
+                                   stroke_width=9, color="#2E2E2E"))
+        return shapes, [layout.Capsule(tuple(ends[0]), tuple(ends[1]), 0.1)]
+
+    def draw_load(self, position):
+        """Equipment shapes at one load point plus the obstacle they occupy."""
         centre = p3(position)
         dark = art.EQUIPMENT_COLOR
         shapes = []
         radius = 0.12
-        if self.equipment == "barbell":
+        rig = self.spec.setup.rig
+        if rig in (RigKind.MACHINE_LEVER, RigKind.MACHINE_LINEAR, RigKind.CABLE) or self.equipment in ("machine", "cable", "band"):
+            # A grip in the hands, a roller pad or platform contact at the feet
+            radius = 0.16 if self.spec.load_attachment.value in ("feet", "hips", "elbows", "knees") else 0.13
+            shapes.append(Circle(radius=radius, color="#2E2E2E", stroke_width=2, fill_color=dark, fill_opacity=1.0).move_to(centre))
+            shapes.append(Circle(radius=radius * 0.45, color="#5A5A5A", stroke_width=1.2, fill_color="#6A6A6A", fill_opacity=1.0).move_to(centre))
+        elif self.equipment == "barbell" or rig == RigKind.SMITH:
             radius = PLATE_RADIUS
             shapes.append(Circle(radius=radius, color="#2E2E2E", stroke_width=2, fill_color=dark, fill_opacity=1.0).move_to(centre))
             shapes.append(Circle(radius=radius * 0.82, color="#5A5A5A", stroke_width=1.5, fill_opacity=0.0).move_to(centre))
@@ -224,13 +283,8 @@ class ExerciseScene(Scene):
             bell = centre + np.array([0, -0.24, 0])
             shapes.append(Circle(radius=0.28, color="#2E2E2E", stroke_width=2, fill_color=dark, fill_opacity=1.0).move_to(bell))
             shapes.append(Arc(radius=0.17, start_angle=0, angle=math.pi, color=dark, stroke_width=6).move_to(centre + np.array([0, 0.02, 0])))
-        else:  # machine, cable, band: just the handle
+        else:  # bodyweight with a load attachment: a small marker
             shapes.append(Circle(radius=radius, color="#2E2E2E", fill_color=dark, fill_opacity=1.0).move_to(centre))
-        if self.equipment == "cable":
-            for prop in self.spec.props:
-                if prop.kind == PropKind.CABLE_ANCHOR:
-                    anchor = [sk.FEET_ANCHOR_X + prop.x, sk.FLOOR_Y + prop.y, 0]
-                    shapes.insert(0, Line(centre, anchor, stroke_width=3, color="#8FA39A"))
         return shapes, layout.Capsule(tuple(position), tuple(position), radius + 0.04)
 
     def draw_forces(self, points, frame, obstacles, taken) -> list:
@@ -242,7 +296,7 @@ class ExerciseScene(Scene):
                 origin = self.load_position(points)
                 clearance = PLATE_RADIUS if self.equipment == "barbell" else 0.2
                 if origin is None:
-                    origin, clearance = points["wrist"], 0.1
+                    origin, clearance = points["near_wrist"], 0.1
             else:
                 origin, clearance = points[force.anchor.value], 0.25 * sk.SCALE
             direction = sk.direction(force.angle_deg)
@@ -261,12 +315,19 @@ class ExerciseScene(Scene):
 
     def draw_angle_markers(self, points, obstacles, taken) -> list:
         shapes = []
+        # Per-side shoulder/hip joints: they coincide with the torso ends in side view, spread apart in front view
         rays = {
-            JointName.KNEE: ("ankle", "knee", "hip"),
-            JointName.HIP: ("knee", "hip", "shoulder"),
-            JointName.ELBOW: ("shoulder", "elbow", "wrist"),
+            JointName.KNEE: ("near_ankle", "near_knee", "near_hip"),
+            JointName.HIP: ("near_knee", "near_hip", "near_shoulder"),
+            JointName.ELBOW: ("near_shoulder", "near_elbow", "near_wrist"),
+            JointName.SHOULDER: ("near_hip", "near_shoulder", "near_elbow"),
         }
+        # Seated and seen from the front the thigh is foreshortened: its 2D hip/knee angles mean nothing
+        hidden = ({JointName.HIP, JointName.KNEE}
+                  if self.spec.view == View.FRONT and self.spec.setup.posture == Posture.SEATED else set())
         for joint in self.spec.angle_markers:
+            if joint in hidden:
+                continue
             a_name, v_name, b_name = rays[joint]
             a, vertex, b = points[a_name], points[v_name], points[b_name]
             interior = sk.joint_angle(a, vertex, b)

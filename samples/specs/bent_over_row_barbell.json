@@ -1,0 +1,56 @@
+{
+  "subtitle": "Barbell horizontal pull",
+  "setup": {"posture": "standing", "support": "none", "support_angle_deg": 0, "rig": "free", "fixed_contacts": []},
+  "load_attachment": "hands",
+  "balance_over_midfoot": true,
+  "reps": 2,
+  "keyframes": [
+    {
+      "torso": 32,
+      "near_arm": {"target": {"angle_deg": 258, "reach": 0.99}},
+      "near_leg": {"proximal": 305, "distal": 262},
+      "duration_s": 1.0, "hold_s": 0.4, "active_step": 0,
+      "muscle_activation": [
+        {"region": "lats", "level": 0.4}, {"region": "upper_back", "level": 0.4}, {"region": "lower_back", "level": 0.6}, {"region": "hamstrings", "level": 0.4}, {"region": "forearms", "level": 0.5}
+      ]
+    },
+    {
+      "torso": 32,
+      "near_arm": {"target": {"angle_deg": 245, "reach": 0.78}},
+      "near_leg": {"proximal": 305, "distal": 262},
+      "duration_s": 0.8, "hold_s": 0.0, "active_step": 1,
+      "muscle_activation": [
+        {"region": "lats", "level": 0.8}, {"region": "upper_back", "level": 0.8}, {"region": "biceps", "level": 0.6}, {"region": "lower_back", "level": 0.6}, {"region": "forearms", "level": 0.5}
+      ]
+    },
+    {
+      "torso": 32,
+      "near_arm": {"target": {"angle_deg": 232, "reach": 0.56}},
+      "near_leg": {"proximal": 305, "distal": 262},
+      "duration_s": 0.5, "hold_s": 0.5, "active_step": 2,
+      "muscle_activation": [
+        {"region": "lats", "level": 1.0}, {"region": "upper_back", "level": 1.0}, {"region": "biceps", "level": 0.75}, {"region": "lower_back", "level": 0.65}, {"region": "forearms", "level": 0.5}
+      ]
+    },
+    {
+      "torso": 32,
+      "near_arm": {"target": {"angle_deg": 258, "reach": 0.99}},
+      "near_leg": {"proximal": 305, "distal": 262},
+      "duration_s": 1.2, "hold_s": 0.4, "active_step": 3,
+      "muscle_activation": [
+        {"region": "lats", "level": 0.5}, {"region": "upper_back", "level": 0.5}, {"region": "lower_back", "level": 0.6}, {"region": "hamstrings", "level": 0.4}, {"region": "forearms", "level": 0.5}
+      ]
+    }
+  ],
+  "steps": [
+    {"title": "Hinge and brace", "description": "Hips back, torso about 30° above the floor, flat back."},
+    {"title": "Pull to the belly", "description": "Drive the elbows back, bar travels along the thighs."},
+    {"title": "Squeeze the back", "description": "Bar touches the lower ribs, shoulder blades pinched."},
+    {"title": "Lower with control", "description": "Straighten the arms without losing the hinge."}
+  ],
+  "force_vectors": [
+    {"kind": "muscle_pull", "anchor": "elbow", "angle_deg": 160, "magnitude": 0.8, "label": "Row", "active_steps": [1, 2]},
+    {"kind": "load", "anchor": "load", "angle_deg": 270, "magnitude": 0.9, "label": "Load", "active_steps": [0, 3]}
+  ],
+  "angle_markers": ["elbow", "hip"]
+}

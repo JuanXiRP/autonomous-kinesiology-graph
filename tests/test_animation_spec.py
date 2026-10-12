@@ -4,9 +4,10 @@ from pathlib import Path
 import pytest
 from pydantic import ValidationError
 
-from src.domain.animation import AnimationSpec
+from src.domain.animation import AnimationSpec, Setup
 
-GOLDEN = Path("samples/romanian_deadlift_spec.json")
+GOLDEN = Path("samples/specs/romanian_deadlift_barbell.json")
+SINGLE_LEG = Path("samples/specs/single_leg_romanian_deadlift_dumbbell.json")
 
 
 def golden_data() -> dict:
@@ -29,6 +30,27 @@ def test_loop_must_close():
 
     # Act / Assert
     with pytest.raises(ValidationError, match="last keyframe"):
+        AnimationSpec.model_validate(data)
+
+
+def test_loop_closure_includes_the_limbs():
+    # Arrange
+    data = golden_data()
+    data["keyframes"][-1]["near_arm"] = {"proximal": 200, "distal": 270}
+
+    # Act / Assert
+    with pytest.raises(ValidationError, match="near_arm differs"):
+        AnimationSpec.model_validate(data)
+
+
+def test_loop_closure_compares_targets():
+    # Arrange
+    data = golden_data()
+    data["keyframes"][0]["near_arm"] = {"target": {"angle_deg": 270, "reach": 1.0}}
+    data["keyframes"][-1]["near_arm"] = {"target": {"angle_deg": 270, "reach": 0.8}}
+
+    # Act / Assert
+    with pytest.raises(ValidationError, match="near_arm differs"):
         AnimationSpec.model_validate(data)
 
 
@@ -62,16 +84,6 @@ def test_muscle_level_must_be_between_zero_and_one():
         AnimationSpec.model_validate(data)
 
 
-def test_cable_anchor_needs_a_height():
-    # Arrange
-    data = golden_data()
-    data["props"] = [{"kind": "cable_anchor", "x": 2.0, "y": 0.0}]
-
-    # Act / Assert
-    with pytest.raises(ValidationError, match="cable_anchor"):
-        AnimationSpec.model_validate(data)
-
-
 def test_balance_flag_defaults_to_false():
     # Arrange
     data = golden_data()
@@ -81,34 +93,82 @@ def test_balance_flag_defaults_to_false():
     assert AnimationSpec.model_validate(data).balance_over_midfoot is False
 
 
-def test_free_leg_angles_must_come_in_pairs():
+def test_limb_needs_exactly_one_mode():
     # Arrange
     data = golden_data()
-    for keyframe in data["keyframes"]:
-        keyframe["free_thigh"] = 80
+    data["keyframes"][1]["near_arm"] = {"proximal": 260, "distal": 260, "target": {"angle_deg": 270, "reach": 0.9}}
 
     # Act / Assert
-    with pytest.raises(ValidationError, match="set together"):
+    with pytest.raises(ValidationError, match="either proximal"):
         AnimationSpec.model_validate(data)
 
 
-def test_free_leg_must_be_in_every_keyframe():
+def test_limb_angles_come_in_pairs():
     # Arrange
     data = golden_data()
-    data["keyframes"][0].update({"free_thigh": 80, "free_shank": 70})
+    data["keyframes"][1]["near_arm"] = {"proximal": 260}
+
+    # Act / Assert
+    with pytest.raises(ValidationError, match="needs both proximal and distal"):
+        AnimationSpec.model_validate(data)
+
+
+def test_reach_must_be_in_range():
+    # Arrange
+    data = golden_data()
+    data["keyframes"][1]["near_arm"] = {"target": {"angle_deg": 270, "reach": 1.4}}
+
+    # Act / Assert
+    with pytest.raises(ValidationError, match="reach must be between"):
+        AnimationSpec.model_validate(data)
+
+
+def test_far_leg_must_be_in_every_keyframe_or_none():
+    # Arrange
+    data = golden_data()
+    data["keyframes"][0]["far_leg"] = {"proximal": 250, "distal": 250}
 
     # Act / Assert
     with pytest.raises(ValidationError, match="every keyframe or in none"):
         AnimationSpec.model_validate(data)
 
 
-def test_loop_closure_includes_the_free_leg():
-    # Arrange
-    data = golden_data()
-    for keyframe in data["keyframes"]:
-        keyframe.update({"free_thigh": 80, "free_shank": 70})
-    data["keyframes"][-1]["free_thigh"] = 40
+def test_single_leg_sample_has_an_independent_far_leg():
+    # Arrange / Act
+    spec = AnimationSpec.model_validate(json.loads(SINGLE_LEG.read_text(encoding="utf-8")))
 
-    # Act / Assert
-    with pytest.raises(ValidationError, match="free_thigh differs"):
-        AnimationSpec.model_validate(data)
+    # Assert
+    assert spec.has_independent("far_leg")
+    assert not spec.has_independent("far_arm")
+
+
+def test_support_must_match_the_posture():
+    # Arrange / Act / Assert
+    with pytest.raises(ValidationError, match="needs posture"):
+        Setup(posture="standing", support="incline_bench", support_angle_deg=30)
+
+
+def test_incline_angle_is_range_checked():
+    # Arrange / Act / Assert
+    with pytest.raises(ValidationError, match="support_angle_deg for incline_bench"):
+        Setup(posture="supine", support="incline_bench", support_angle_deg=5)
+
+
+def test_flat_bench_angle_is_forced_to_zero():
+    # Arrange / Act
+    setup = Setup(posture="supine", support="flat_bench", support_angle_deg=20)
+
+    # Assert
+    assert setup.support_angle_deg == 0
+
+
+def test_cable_rig_needs_a_pulley():
+    # Arrange / Act / Assert
+    with pytest.raises(ValidationError, match="cable pulley"):
+        Setup(posture="standing", rig="cable")
+
+
+def test_hanging_needs_a_bar():
+    # Arrange / Act / Assert
+    with pytest.raises(ValidationError, match="hanging"):
+        Setup(posture="hanging", support="none")

@@ -1,0 +1,66 @@
+{
+  "subtitle": "Dumbbell shoulder abduction",
+  "view": "front",
+  "setup": {"posture": "standing", "support": "none", "support_angle_deg": 0, "rig": "free", "fixed_contacts": []},
+  "load_attachment": "hands",
+  "balance_over_midfoot": false,
+  "reps": 2,
+  "keyframes": [
+    {
+      "torso": 90,
+      "near_arm": {"proximal": 276, "distal": 274},
+      "near_leg": {"proximal": 270, "distal": 270},
+      "duration_s": 1.0, "hold_s": 0.4, "active_step": 0,
+      "muscle_activation": [
+        {"region": "shoulders", "level": 0.3}, {"region": "traps", "level": 0.2}
+      ]
+    },
+    {
+      "torso": 90,
+      "near_arm": {"proximal": 318, "distal": 310},
+      "near_leg": {"proximal": 270, "distal": 270},
+      "duration_s": 0.8, "hold_s": 0.0, "active_step": 1,
+      "muscle_activation": [
+        {"region": "shoulders", "level": 0.75}, {"region": "traps", "level": 0.35}
+      ]
+    },
+    {
+      "torso": 90,
+      "near_arm": {"proximal": 358, "distal": 348},
+      "near_leg": {"proximal": 270, "distal": 270},
+      "duration_s": 0.6, "hold_s": 0.5, "active_step": 2,
+      "muscle_activation": [
+        {"region": "shoulders", "level": 1.0}, {"region": "traps", "level": 0.5}
+      ]
+    },
+    {
+      "torso": 90,
+      "near_arm": {"proximal": 318, "distal": 310},
+      "near_leg": {"proximal": 270, "distal": 270},
+      "duration_s": 0.9, "hold_s": 0.0, "active_step": 3,
+      "muscle_activation": [
+        {"region": "shoulders", "level": 0.7}, {"region": "traps", "level": 0.35}
+      ]
+    },
+    {
+      "torso": 90,
+      "near_arm": {"proximal": 276, "distal": 274},
+      "near_leg": {"proximal": 270, "distal": 270},
+      "duration_s": 0.8, "hold_s": 0.3, "active_step": 3,
+      "muscle_activation": [
+        {"region": "shoulders", "level": 0.3}, {"region": "traps", "level": 0.2}
+      ]
+    }
+  ],
+  "steps": [
+    {"title": "Stand tall", "description": "Dumbbells at the sides, soft elbows, shoulders down."},
+    {"title": "Raise out wide", "description": "Lead with the elbows, arms travel out to the sides."},
+    {"title": "Shoulder height", "description": "Stop with the arms parallel to the floor, no shrug."},
+    {"title": "Lower slowly", "description": "Control the dumbbells back to the sides."}
+  ],
+  "force_vectors": [
+    {"kind": "muscle_pull", "anchor": "elbow", "angle_deg": 60, "magnitude": 0.8, "label": "Deltoids", "active_steps": [1, 2]},
+    {"kind": "load", "anchor": "load", "angle_deg": 270, "magnitude": 0.8, "label": "Load", "active_steps": [3]}
+  ],
+  "angle_markers": ["shoulder"]
+}

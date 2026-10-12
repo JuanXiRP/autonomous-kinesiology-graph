@@ -1,0 +1,56 @@
+{
+  "subtitle": "Machine hip abduction",
+  "view": "front",
+  "setup": {"posture": "seated", "support": "seat_with_backrest", "support_angle_deg": 90, "rig": "machine_lever", "fixed_contacts": []},
+  "load_attachment": "knees",
+  "balance_over_midfoot": false,
+  "reps": 2,
+  "keyframes": [
+    {
+      "torso": 90,
+      "near_arm": {"proximal": 276, "distal": 274},
+      "near_leg": {"proximal": 272, "distal": 270},
+      "duration_s": 1.0, "hold_s": 0.4, "active_step": 0,
+      "muscle_activation": [
+        {"region": "abductors", "level": 0.35}, {"region": "glutes", "level": 0.3}
+      ]
+    },
+    {
+      "torso": 90,
+      "near_arm": {"proximal": 276, "distal": 274},
+      "near_leg": {"proximal": 298, "distal": 276},
+      "duration_s": 0.8, "hold_s": 0.0, "active_step": 1,
+      "muscle_activation": [
+        {"region": "abductors", "level": 0.75}, {"region": "glutes", "level": 0.55}
+      ]
+    },
+    {
+      "torso": 90,
+      "near_arm": {"proximal": 276, "distal": 274},
+      "near_leg": {"proximal": 318, "distal": 280},
+      "duration_s": 0.6, "hold_s": 0.5, "active_step": 1,
+      "muscle_activation": [
+        {"region": "abductors", "level": 1.0}, {"region": "glutes", "level": 0.75}
+      ]
+    },
+    {
+      "torso": 90,
+      "near_arm": {"proximal": 276, "distal": 274},
+      "near_leg": {"proximal": 272, "distal": 270},
+      "duration_s": 1.2, "hold_s": 0.3, "active_step": 2,
+      "muscle_activation": [
+        {"region": "abductors", "level": 0.35}, {"region": "glutes", "level": 0.3}
+      ]
+    }
+  ],
+  "steps": [
+    {"title": "Sit back", "description": "Back on the pad, pads on the outer knees, hands on the grips."},
+    {"title": "Spread the knees", "description": "Push the pads apart with the outer hips, torso still."},
+    {"title": "Return with control", "description": "Let the knees come back together slowly."}
+  ],
+  "force_vectors": [
+    {"kind": "muscle_pull", "anchor": "knee", "angle_deg": 0, "magnitude": 0.8, "label": "Abduct", "active_steps": [1]},
+    {"kind": "load", "anchor": "load", "angle_deg": 180, "magnitude": 0.7, "label": "Pad", "active_steps": [2]}
+  ],
+  "angle_markers": []
+}

@@ -4,6 +4,7 @@ from langchain_core.messages import HumanMessage, SystemMessage
 from langchain_google_genai import ChatGoogleGenerativeAI
 from pydantic import BaseModel, Field
 
+from src.domain.animation import MovementFamily
 from src.domain.models import EquipmentType, display_name, make_slug
 
 # This model is the Gemini structured-output schema: the Field descriptions are prompt text.
@@ -13,6 +14,7 @@ class ExerciseVariant(BaseModel):
     equipment: EquipmentType = Field(description="The equipment of this variant.")
     label_es: str = Field(description="Spanish label shown to the user, including the equipment, e.g. 'Peso muerto rumano (barra)'.")
     note_es: str = Field(description="One short Spanish sentence on what changes in this variant.")
+    movement_family: MovementFamily = Field(default=MovementFamily.OTHER, description="Movement pattern: hinge (deadlifts, good mornings), squat (squats, leg press, hack squat), lunge (lunges, split squats, step-ups), horizontal_press (flat/decline bench, chest press, floor press), incline_press, vertical_press (overhead/shoulder press), horizontal_pull (rows, face pulls), vertical_pull (pull-ups, pulldowns), elbow_flexion (curls), elbow_extension (triceps extensions, pushdowns, skull crushers), hip_extension (hip thrusts, glute bridges, kickbacks), knee_extension (leg extension), knee_flexion (leg curls), push_up_plank (push-ups, planks), dip, lateral_raise (lateral/front raises, flyes seen from the front), hip_abduction (abduction/adduction), core_flexion (crunches, sit-ups, leg raises) or other.")
 
     @property
     def slug(self) -> str:
@@ -35,6 +37,7 @@ Return the concrete variants of THAT exercise that a coach would program:
 - Never invent exotic variants; never return two variants with the same name and equipment.
 - Order from the most common to the least common. Between 2 and 8 variants.
 - label_es and note_es are in Spanish; everything else in English.
+- movement_family classifies the movement pattern of each variant.
 """
 
 def _dedupe(options: VariantOptions) -> VariantOptions:

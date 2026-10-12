@@ -1,0 +1,55 @@
+{
+  "subtitle": "Machine knee extension",
+  "setup": {"posture": "seated", "support": "seat_with_backrest", "support_angle_deg": 80, "rig": "machine_lever", "fixed_contacts": []},
+  "load_attachment": "feet",
+  "balance_over_midfoot": false,
+  "reps": 2,
+  "keyframes": [
+    {
+      "torso": 100,
+      "near_arm": {"proximal": 282, "distal": 318},
+      "near_leg": {"proximal": 0, "distal": 272},
+      "duration_s": 1.0, "hold_s": 0.4, "active_step": 0,
+      "muscle_activation": [
+        {"region": "quadriceps", "level": 0.35}
+      ]
+    },
+    {
+      "torso": 100,
+      "near_arm": {"proximal": 282, "distal": 318},
+      "near_leg": {"proximal": 0, "distal": 318},
+      "duration_s": 0.8, "hold_s": 0.0, "active_step": 1,
+      "muscle_activation": [
+        {"region": "quadriceps", "level": 0.75}
+      ]
+    },
+    {
+      "torso": 100,
+      "near_arm": {"proximal": 282, "distal": 318},
+      "near_leg": {"proximal": 2, "distal": 358},
+      "duration_s": 0.6, "hold_s": 0.6, "active_step": 1,
+      "muscle_activation": [
+        {"region": "quadriceps", "level": 1.0}
+      ]
+    },
+    {
+      "torso": 100,
+      "near_arm": {"proximal": 282, "distal": 318},
+      "near_leg": {"proximal": 0, "distal": 272},
+      "duration_s": 1.3, "hold_s": 0.3, "active_step": 2,
+      "muscle_activation": [
+        {"region": "quadriceps", "level": 0.4}
+      ]
+    }
+  ],
+  "steps": [
+    {"title": "Align the knee", "description": "Knee joint in line with the machine pivot, pad on the lower shin."},
+    {"title": "Extend the knees", "description": "Straighten the legs fully and squeeze the quads."},
+    {"title": "Lower slowly", "description": "Return to about 90° of knee bend under control."}
+  ],
+  "force_vectors": [
+    {"kind": "muscle_pull", "anchor": "load", "angle_deg": 70, "magnitude": 0.8, "label": "Extend", "active_steps": [1]},
+    {"kind": "load", "anchor": "load", "angle_deg": 250, "magnitude": 0.8, "label": "Pad", "active_steps": [2]}
+  ],
+  "angle_markers": ["knee"]
+}

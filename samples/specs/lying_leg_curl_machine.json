@@ -1,0 +1,55 @@
+{
+  "subtitle": "Machine knee flexion",
+  "setup": {"posture": "prone", "support": "flat_bench", "support_angle_deg": 0, "rig": "machine_lever", "fixed_contacts": []},
+  "load_attachment": "feet",
+  "balance_over_midfoot": false,
+  "reps": 2,
+  "keyframes": [
+    {
+      "torso": 0,
+      "near_arm": {"target": {"angle_deg": 300, "reach": 0.75}},
+      "near_leg": {"proximal": 182, "distal": 180},
+      "duration_s": 1.0, "hold_s": 0.4, "active_step": 0,
+      "muscle_activation": [
+        {"region": "hamstrings", "level": 0.35}, {"region": "calves", "level": 0.3}
+      ]
+    },
+    {
+      "torso": 0,
+      "near_arm": {"target": {"angle_deg": 300, "reach": 0.75}},
+      "near_leg": {"proximal": 182, "distal": 130},
+      "duration_s": 0.8, "hold_s": 0.0, "active_step": 1,
+      "muscle_activation": [
+        {"region": "hamstrings", "level": 0.75}, {"region": "calves", "level": 0.4}
+      ]
+    },
+    {
+      "torso": 0,
+      "near_arm": {"target": {"angle_deg": 300, "reach": 0.75}},
+      "near_leg": {"proximal": 182, "distal": 75},
+      "duration_s": 0.6, "hold_s": 0.6, "active_step": 1,
+      "muscle_activation": [
+        {"region": "hamstrings", "level": 1.0}, {"region": "calves", "level": 0.45}
+      ]
+    },
+    {
+      "torso": 0,
+      "near_arm": {"target": {"angle_deg": 300, "reach": 0.75}},
+      "near_leg": {"proximal": 182, "distal": 180},
+      "duration_s": 1.3, "hold_s": 0.3, "active_step": 2,
+      "muscle_activation": [
+        {"region": "hamstrings", "level": 0.35}, {"region": "calves", "level": 0.3}
+      ]
+    }
+  ],
+  "steps": [
+    {"title": "Lie and align", "description": "Knees just off the pad edge, roller above the heels."},
+    {"title": "Curl the heels up", "description": "Bend the knees towards the glutes, hips pressed down."},
+    {"title": "Lower under control", "description": "Straighten the legs slowly without locking the knees."}
+  ],
+  "force_vectors": [
+    {"kind": "muscle_pull", "anchor": "load", "angle_deg": 100, "magnitude": 0.8, "label": "Curl", "active_steps": [1]},
+    {"kind": "load", "anchor": "load", "angle_deg": 270, "magnitude": 0.7, "label": "Pad", "active_steps": [2]}
+  ],
+  "angle_markers": ["knee"]
+}

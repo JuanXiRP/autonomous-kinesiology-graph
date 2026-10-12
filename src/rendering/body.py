@@ -2,7 +2,6 @@
 # Anatomical vector body for the Manim scene: tapered limb silhouettes with muscle bellies that follow
 # the outline and tint from neutral grey to green with tension. Geometry helpers are pure (no Manim).
 import math
-from dataclasses import dataclass
 
 import numpy as np
 from manim import Circle, Polygon, VMobject
@@ -10,6 +9,7 @@ from manim import Circle, Polygon, VMobject
 from src.rendering import palette as art
 from src.domain.animation import MuscleRegion
 from src.rendering import skeleton as sk
+from src.rendering.anatomy import PROFILES, Profile, front_normal, half_width
 from src.rendering.layout import Capsule
 
 S = sk.SCALE
@@ -20,23 +20,6 @@ OUTLINE = "#7C8A83"
 OUTLINE_FAR = "#AEB9B3"
 MUSCLE_IDLE = "#C4CFC9"
 FIBRE = "#9EADA6"
-
-@dataclass(frozen=True)
-class Profile:
-    """Half-widths of a limb along its length (t=0 at the first joint, t=1 at the second).
-    Each side is (start, belly, end, belly_position)."""
-    front: tuple[float, float, float, float]
-    back: tuple[float, float, float, float]
-
-# Front = the side the figure faces (see front_normal); values in unscaled body units
-PROFILES = {
-    "shank": Profile(front=(0.09, 0.11, 0.13, 0.6), back=(0.08, 0.22, 0.14, 0.62)),
-    "thigh": Profile(front=(0.13, 0.25, 0.21, 0.55), back=(0.13, 0.22, 0.24, 0.6)),
-    "torso": Profile(front=(0.22, 0.27, 0.30, 0.8), back=(0.27, 0.25, 0.31, 0.78)),
-    "upper_arm": Profile(front=(0.11, 0.135, 0.085, 0.5), back=(0.12, 0.15, 0.085, 0.4)),
-    "forearm": Profile(front=(0.09, 0.115, 0.06, 0.25), back=(0.085, 0.105, 0.06, 0.3)),
-    "neck": Profile(front=(0.09, 0.085, 0.08, 0.5), back=(0.10, 0.09, 0.08, 0.5)),
-}
 
 # region -> (segment, t0, t1, side, depth): side +1 front, -1 back, 0 both; depth = share of the half-width
 MUSCLES = {
@@ -52,6 +35,11 @@ MUSCLES = {
     MuscleRegion.BICEPS: ("upper_arm", 0.30, 0.90, 1, 0.85),
     MuscleRegion.TRICEPS: ("upper_arm", 0.30, 0.90, -1, 0.85),
     MuscleRegion.FOREARMS: ("forearm", 0.05, 0.75, 0, 0.85),
+    MuscleRegion.ADDUCTORS: ("thigh", 0.35, 0.85, 0, 0.3),
+    MuscleRegion.HIP_FLEXORS: ("thigh", 0.72, 1.0, 1, 0.6),
+    MuscleRegion.OBLIQUES: ("torso", 0.18, 0.62, 0, 0.35),
+    MuscleRegion.ABDUCTORS: ("torso", 0.0, 0.2, -1, 0.95),
+    MuscleRegion.TRAPS: ("torso", 0.82, 1.05, -1, 0.95),
 }
 
 def blend(c1_hex: str, c2_hex: str, t: float) -> str:
@@ -65,25 +53,10 @@ def muscle_color(level: float) -> str:
         return blend(MUSCLE_IDLE, art.GLOW_GREEN, level * 2)
     return blend(art.GLOW_GREEN, art.PRIMARY_GREEN, (level - 0.5) * 2)
 
-def front_normal(direction: np.ndarray, segment: str) -> np.ndarray:
-    """Unit vector pointing to the front of the body (the figure faces right)."""
-    if segment in ("upper_arm", "forearm"):  # arm vectors point downwards when hanging
-        return np.array([-direction[1], direction[0]])
-    return np.array([direction[1], -direction[0]])
-
-def half_width(side: tuple[float, float, float, float], t: float) -> float:
-    """Smooth width profile through start -> belly -> end."""
-    start, belly, end, at = side
-    t = min(max(t, 0.0), 1.0)
-    if t <= at:
-        u = t / at
-        return (start + (belly - start) * math.sin(u * math.pi / 2)) * S
-    u = (t - at) / (1 - at)
-    return (belly + (end - belly) * (1 - math.cos(u * math.pi / 2))) * S
-
-def outline_points(start: np.ndarray, end: np.ndarray, segment: str, samples: int = 14) -> list[np.ndarray]:
+def outline_points(start: np.ndarray, end: np.ndarray, segment: str, samples: int = 14,
+                   profile: Profile | None = None) -> list[np.ndarray]:
     """Closed outline of a limb: front side going up, rounded end cap, back side coming down."""
-    profile = PROFILES[segment]
+    profile = profile or PROFILES[segment]
     vector = end - start
     unit = vector / np.linalg.norm(vector)
     normal = front_normal(unit, segment)
@@ -104,9 +77,10 @@ def _cap(centre, forward, normal, r_front, r_back, steps: int = 6) -> list[np.nd
     return points
 
 def muscle_points(start: np.ndarray, end: np.ndarray, segment: str, t0: float, t1: float,
-                  side: int, depth: float, samples: int = 12) -> tuple[list[np.ndarray], list[list[np.ndarray]]]:
+                  side: int, depth: float, samples: int = 12,
+                  profile: Profile | None = None) -> tuple[list[np.ndarray], list[list[np.ndarray]]]:
     """Belly outline that follows the limb silhouette, plus two fibre lines inside it."""
-    profile = PROFILES[segment]
+    profile = profile or PROFILES[segment]
     vector = end - start
     unit = vector / np.linalg.norm(vector)
     normal = front_normal(unit, segment)
@@ -140,47 +114,48 @@ def _polyline(points, color: str, width: float) -> VMobject:
     line = VMobject().set_points_smoothly([p3(p) for p in points])
     return line.set_stroke(color=color, width=width)
 
-def limb_segments(points: dict[str, np.ndarray]) -> dict[str, tuple[np.ndarray, np.ndarray]]:
+def limb_segments(points: dict[str, np.ndarray], side: str = "near") -> dict[str, tuple[np.ndarray, np.ndarray]]:
     neck_top = points["shoulder"] + (points["head"] - points["shoulder"]) * 0.55
     return {
-        "shank": (points["ankle"], points["knee"]),
-        "thigh": (points["knee"], points["hip"]),
+        "shank": (points[f"{side}_ankle"], points[f"{side}_knee"]),
+        "thigh": (points[f"{side}_knee"], points["hip"]),
         "torso": (points["hip"], points["shoulder"]),
-        "upper_arm": (points["shoulder"], points["elbow"]),
-        "forearm": (points["elbow"], points["wrist"]),
+        "upper_arm": (points["shoulder"], points[f"{side}_elbow"]),
+        "forearm": (points[f"{side}_elbow"], points[f"{side}_wrist"]),
         "neck": (points["shoulder"], neck_top),
     }
 
+def far_is_mirror(points: dict[str, np.ndarray], limb: str) -> bool:
+    """True when the far arm/leg coincides with the near one (bilateral movement)."""
+    joints = ("elbow", "wrist") if limb == "arm" else ("knee", "ankle")
+    return all(np.allclose(points[f"near_{j}"], points[f"far_{j}"], atol=1e-6) for j in joints)
+
+def _capsule(start, end, segment: str) -> Capsule:
+    profile = PROFILES[segment]
+    return Capsule(tuple(start), tuple(end), max(profile.front[1], profile.back[1]) * S)
+
 def body_obstacles(points: dict[str, np.ndarray]) -> list[Capsule]:
     """Capsules approximating the drawn body, used to keep labels off it."""
-    capsules = []
-    for name, (start, end) in limb_segments(points).items():
-        profile = PROFILES[name]
-        radius = max(profile.front[1], profile.back[1]) * S
-        capsules.append(Capsule(tuple(start), tuple(end), radius))
+    capsules = [_capsule(start, end, name) for name, (start, end) in limb_segments(points).items()]
+    far = limb_segments(points, "far")
+    for limb, names in (("arm", ("upper_arm", "forearm")), ("leg", ("shank", "thigh"))):
+        if not far_is_mirror(points, limb):
+            capsules += [_capsule(*far[name], name) for name in names]
     head = points["head"]
     capsules.append(Capsule(tuple(head), tuple(head), sk.HEAD_RADIUS * 1.15))
-    capsules.append(Capsule(tuple(points["heel"]), tuple(points["toe"]), 0.12 * S))
-    for name, (start, end) in free_leg_segments(points).items():
-        profile = PROFILES[name]
-        capsules.append(Capsule(tuple(start), tuple(end), max(profile.front[1], profile.back[1]) * S))
-    if "free_knee" in points:
-        capsules.append(Capsule(tuple(points["free_heel"]), tuple(points["free_toe"]), 0.12 * S))
+    for side in ("near", "far"):
+        capsules.append(Capsule(tuple(points[f"{side}_heel"]), tuple(points[f"{side}_toe"]), 0.12 * S))
     return capsules
 
 FOOT_SHAPE = [(-0.10, 0.05), (-0.24, -0.06), (-0.26, -0.17), (-0.20, -0.20), (0.42, -0.20),
               (0.44, -0.14), (0.30, -0.10), (0.10, -0.03), (0.06, 0.05)]
+FLAT_FOOT_ANGLE = sk.angle_of(sk.TOE_OFFSET - sk.HEEL_OFFSET)
 
-def _foot(points, offset=np.zeros(2), ankle_key: str = "ankle", turn_deg: float = 0.0) -> list[np.ndarray]:
-    a = points[ankle_key] + offset
-    return [a + sk.rotate(np.array(p) * S, turn_deg) for p in FOOT_SHAPE]
-
-def free_leg_segments(points: dict[str, np.ndarray]) -> dict[str, tuple[np.ndarray, np.ndarray]]:
-    """Shank and thigh of the non-working leg (single-leg exercises), keyed like limb_segments."""
-    if "free_knee" not in points:
-        return {}
-    return {"shank": (points["free_ankle"], points["free_knee"]),
-            "thigh": (points["free_knee"], points["hip"])}
+def _foot(points, side: str = "near", offset=np.zeros(2)) -> list[np.ndarray]:
+    """Foot outline rotated like the solved heel->toe line."""
+    turn = sk.angle_of(points[f"{side}_toe"] - points[f"{side}_heel"]) - FLAT_FOOT_ANGLE
+    ankle = points[f"{side}_ankle"] + offset
+    return [ankle + sk.rotate(np.array(p) * S, turn) for p in FOOT_SHAPE]
 
 def _head(points, offset=np.zeros(2)) -> list:
     """Skull in profile: an egg shape tilted with the torso and a small nose on the front."""
@@ -202,7 +177,8 @@ def _head(points, offset=np.zeros(2)) -> list:
 def build_body(points: dict[str, np.ndarray], activation: dict) -> list:
     """Back-to-front drawing list: far arm and leg, near leg, torso, muscles, head, near arm."""
     segments = limb_segments(points)
-    free_segments = free_leg_segments(points)
+    far_segments = limb_segments(points, "far")
+    mirror_arm, mirror_leg = far_is_mirror(points, "arm"), far_is_mirror(points, "leg")
     far_offset = np.array([-0.06, 0.05]) * S
     shapes = []
 
@@ -216,26 +192,29 @@ def build_body(points: dict[str, np.ndarray], activation: dict) -> list:
         for fibre in fibres:
             shapes.append(_polyline(fibre, art.DARK_GREEN if level > 0.5 else FIBRE, 0.8))
 
-    # Far-side arm (lighter, no muscle detail)
+    # Far-side arm (lighter, no muscle detail); a mirrored arm peeks out slightly offset
+    arm_offset = far_offset if mirror_arm else np.zeros(2)
     for name in ("upper_arm", "forearm"):
-        start, end = segments[name]
-        shapes.append(_polygon(outline_points(start + far_offset, end + far_offset, name), SKIN_FAR, OUTLINE_FAR, 1.2))
+        start, end = far_segments[name]
+        shapes.append(_polygon(outline_points(start + arm_offset, end + arm_offset, name), SKIN_FAR, OUTLINE_FAR, 1.2))
+    if not mirror_arm:
+        hand = Circle(radius=0.09 * S, color=OUTLINE_FAR, stroke_width=1.2, fill_color=SKIN_FAR, fill_opacity=1)
+        shapes.append(hand.move_to(p3(points["far_wrist"])))
 
-    if free_segments:
-        # Single-leg exercise: the non-working leg is drawn in full, with its own muscles
-        turn = float(np.degrees(np.arctan2(*(points["free_knee"] - points["free_ankle"])[::-1]))) - 90.0
-        shapes.append(_polygon(_foot(points, ankle_key="free_ankle", turn_deg=turn), SKIN, OUTLINE, 1.5))
+    if not mirror_leg:
+        # Split stance or single-leg work: the far leg has its own pose and is drawn in full, with its muscles
+        shapes.append(_polygon(_foot(points, "far"), SKIN, OUTLINE, 1.5))
         for name in ("shank", "thigh"):
-            start, end = free_segments[name]
+            start, end = far_segments[name]
             shapes.append(_polygon(outline_points(start, end, name), SKIN, OUTLINE, 1.5))
         for region in MUSCLES:
             if MUSCLES[region][0] in ("shank", "thigh"):
-                add_muscle(region, free_segments)
+                add_muscle(region, far_segments)
     else:
         # Two-legged exercise: the far leg mirrors the near one, lighter and slightly offset
-        shapes.append(_polygon(_foot(points, far_offset), SKIN_FAR, OUTLINE_FAR, 1.2))
+        shapes.append(_polygon(_foot(points, "far", far_offset), SKIN_FAR, OUTLINE_FAR, 1.2))
         for name in ("shank", "thigh"):
-            start, end = segments[name]
+            start, end = far_segments[name]
             shapes.append(_polygon(outline_points(start + far_offset, end + far_offset, name), SKIN_FAR, OUTLINE_FAR, 1.2))
 
     # Near leg, torso and neck
@@ -266,5 +245,5 @@ def build_body(points: dict[str, np.ndarray], activation: dict) -> list:
         if MUSCLES[region][0] in ("upper_arm", "forearm"):
             add_muscle(region)
     hand = Circle(radius=0.09 * S, color=OUTLINE, stroke_width=1.2, fill_color=SKIN, fill_opacity=1)
-    shapes.append(hand.move_to(p3(points["wrist"])))
+    shapes.append(hand.move_to(p3(points["near_wrist"])))
     return shapes

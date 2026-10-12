@@ -4,79 +4,20 @@ from pathlib import Path
 
 import numpy as np
 
-from src.domain.animation import AnchorKind, AnimationSpec
+from src.domain.animation import AnimationSpec
 from src.rendering import skeleton as sk
 
-GOLDEN = Path("samples/romanian_deadlift_spec.json")
+GOLDEN = Path("samples/specs/romanian_deadlift_barbell.json")
+BENCH = Path("samples/specs/bench_press_barbell.json")
 
 
-def golden_spec() -> AnimationSpec:
-    return AnimationSpec.model_validate(json.loads(GOLDEN.read_text(encoding="utf-8")))
-
-
-def test_bone_lengths_are_constant_across_the_whole_timeline():
-    # Arrange
-    spec = golden_spec()
-    total = sk.total_duration(spec)
-
-    # Act
-    lengths = set()
-    for i in range(0, 101):
-        points = sk.solve(sk.frame_at(spec, total * i / 100).pose, spec.anchor)
-        lengths.add((
-            round(float(np.linalg.norm(points["knee"] - points["ankle"])), 6),
-            round(float(np.linalg.norm(points["hip"] - points["knee"])), 6),
-            round(float(np.linalg.norm(points["shoulder"] - points["hip"])), 6),
-        ))
-
-    # Assert
-    assert len(lengths) == 1
-
-
-def test_feet_stay_on_the_floor_and_planted():
-    # Arrange
-    spec = golden_spec()
-    total = sk.total_duration(spec)
-
-    # Act
-    frames = [sk.solve(sk.frame_at(spec, total * i / 50).pose, spec.anchor) for i in range(51)]
-
-    # Assert
-    assert all(abs(min(p["heel"][1], p["toe"][1]) - sk.FLOOR_Y) < 1e-6 for p in frames)
-    assert all(abs(p["ankle"][0] - sk.FEET_ANCHOR_X) < 1e-6 for p in frames)
-
-
-def test_golden_spec_has_no_geometry_problems():
-    # Arrange / Act / Assert
-    assert sk.check_spec_geometry(golden_spec()) == []
-
-
-def test_backwards_knee_is_flagged():
-    # Arrange: shank leans backwards and the thigh forwards -> the knee points to the left
-    pose = sk.Pose(shank=110, thigh=70, torso=90, upper_arm=270, forearm=270)
-    points = sk.solve(pose)
-
-    # Act
-    problems = sk.check_pose(points, "test")
-
-    # Assert
-    assert any("knee bends backwards" in problem for problem in problems)
-
-
-def test_impossible_flexion_is_flagged():
-    # Arrange: thigh folded flat against the shank
-    pose = sk.Pose(shank=90, thigh=-80, torso=90, upper_arm=270, forearm=270)
-
-    # Act
-    problems = sk.check_pose(sk.solve(pose), "test")
-
-    # Assert
-    assert any("beyond the human range" in problem for problem in problems)
+def load(path: Path) -> AnimationSpec:
+    return AnimationSpec.model_validate(json.loads(path.read_text(encoding="utf-8")))
 
 
 def test_timeline_loops_back_to_the_first_pose():
     # Arrange
-    spec = golden_spec()
+    spec = load(GOLDEN)
     rep = sk.build_timeline(spec).rep_duration
 
     # Act
@@ -87,21 +28,9 @@ def test_timeline_loops_back_to_the_first_pose():
     assert math.isclose(start.torso, next_rep_start.torso, abs_tol=1.0)
 
 
-def test_hanging_anchor_keeps_the_wrist_fixed():
-    # Arrange
-    spec = golden_spec().model_copy(update={"anchor": AnchorKind.HANDS})
-    hand_y = sk.hand_anchor_y(spec)
-
-    # Act
-    wrists = [sk.solve(sk.frame_at(spec, t).pose, spec.anchor, hand_y)["wrist"] for t in (0.0, 2.0, 4.0)]
-
-    # Assert
-    assert all(np.allclose(w, wrists[0]) for w in wrists)
-
-
 def test_peak_activation_is_the_bottom_of_the_romanian_deadlift():
     # Arrange
-    spec = golden_spec()
+    spec = load(GOLDEN)
     timeline = sk.build_timeline(spec)
 
     # Act
@@ -111,94 +40,61 @@ def test_peak_activation_is_the_bottom_of_the_romanian_deadlift():
     assert timeline.arrive[2] <= peak <= timeline.leave[2]
 
 
-def test_golden_load_stays_over_midfoot():
+def test_angle_limbs_interpolate_their_angles():
     # Arrange
-    spec = golden_spec()
+    a = sk.LimbState(proximal=270, distal=270)
+    b = sk.LimbState(proximal=250, distal=230)
 
     # Act
-    offsets = [abs(sk.solve(sk.Pose.from_keyframe(kf), spec.anchor)["wrist"][0]
-                   - sk.midfoot_x(sk.solve(sk.Pose.from_keyframe(kf), spec.anchor)))
-               for kf in spec.keyframes]
+    mid = a.lerp(b, 0.5, "near_arm")
 
     # Assert
-    assert max(offsets) <= sk.MIDFOOT_TOLERANCE
+    assert (mid.proximal, mid.distal) == (260, 250)
 
 
-def test_floating_bar_is_flagged_when_balance_is_required():
-    # Arrange: torso leaning forward with vertical arms puts the bar far in front of the feet
-    data = golden_spec().model_dump(mode="json")
-    for keyframe in data["keyframes"][1:-1]:
-        keyframe.update({"thigh": 100, "torso": 30, "upper_arm": 270, "forearm": 270})
-    spec = AnimationSpec.model_validate(data)
-
-    # Act
-    problems = sk.check_spec_geometry(spec)
-
-    # Assert
-    assert any("in front of mid-foot" in problem for problem in problems)
-
-
-def test_balance_rule_is_skipped_when_not_required():
+def test_target_limbs_interpolate_in_a_straight_line():
     # Arrange
-    data = golden_spec().model_dump(mode="json")
-    data["balance_over_midfoot"] = False
-    for keyframe in data["keyframes"][1:-1]:
-        keyframe.update({"thigh": 100, "torso": 30, "upper_arm": 270, "forearm": 270})
+    a = sk.LimbState(vector=np.array([0.0, 1.0]))
+    b = sk.LimbState(vector=np.array([1.0, 0.0]))
 
     # Act
-    problems = sk.check_spec_geometry(AnimationSpec.model_validate(data))
+    mid = a.lerp(b, 0.5, "near_arm")
 
     # Assert
-    assert not any("mid-foot" in problem for problem in problems)
+    assert np.allclose(mid.vector, [0.5, 0.5])
 
 
-SINGLE_LEG = Path("samples/single_leg_romanian_deadlift_spec.json")
+def test_mixed_modes_interpolate_the_hand_position():
+    # Arrange: straight arm hanging down vs a target in front
+    a = sk.LimbState(proximal=270, distal=270)
+    b = sk.LimbState(vector=np.array([1.0, 0.0]))
+
+    # Act
+    mid = a.lerp(b, 0.5, "near_arm")
+
+    # Assert
+    hanging = np.array([0.0, -sk.limb_length("near_arm")])
+    assert np.allclose(mid.vector, (hanging + b.vector) / 2)
 
 
-def single_leg_spec() -> AnimationSpec:
-    return AnimationSpec.model_validate(json.loads(SINGLE_LEG.read_text(encoding="utf-8")))
-
-
-def test_single_leg_sample_has_no_geometry_problems():
-    # Arrange / Act / Assert
-    assert single_leg_spec().has_free_leg
-    assert sk.check_spec_geometry(single_leg_spec()) == []
-
-
-def test_free_leg_does_not_change_grounding():
+def test_mirrored_far_limb_returns_the_near_one():
     # Arrange
-    with_free = sk.Pose(90, 90, 90, 270, 270, free_thigh=20, free_shank=20)
-    without = sk.Pose(90, 90, 90, 270, 270)
+    spec = load(BENCH)
 
     # Act
-    a, b = sk.solve(with_free), sk.solve(without)
+    pose = sk.Pose.from_keyframe(spec.keyframes[0])
 
     # Assert
-    assert np.allclose(a["ankle"], b["ankle"]) and np.allclose(a["hip"], b["hip"])
+    assert pose.far_arm is None
+    assert pose.limb("far_arm") is pose.near_arm
 
 
-def test_free_leg_bone_lengths_are_constant():
+def test_sample_times_include_every_keyframe():
     # Arrange
-    spec = single_leg_spec()
-    total = sk.total_duration(spec)
+    spec = load(GOLDEN)
 
     # Act
-    lengths = {
-        (round(float(np.linalg.norm(p["hip"] - p["free_knee"])), 6),
-         round(float(np.linalg.norm(p["free_knee"] - p["free_ankle"])), 6))
-        for p in (sk.solve(sk.frame_at(spec, total * i / 40).pose, spec.anchor) for i in range(41))
-    }
+    times = sk.sample_times(spec, 10)
 
     # Assert
-    assert len(lengths) == 1
-
-
-def test_free_foot_through_the_floor_is_flagged():
-    # Arrange: free leg pointing straight down and forward, below the stance foot
-    points = sk.solve(sk.Pose(80, 110, 60, 270, 270, free_thigh=100, free_shank=95))
-
-    # Act
-    problems = sk.check_free_leg_clearance(points, "test")
-
-    # Assert
-    assert any("through the floor" in problem for problem in problems)
+    assert set(sk.build_timeline(spec).arrive[:-1]) <= set(times)

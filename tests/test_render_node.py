@@ -5,7 +5,7 @@ from src.domain.animation import AnimationSpec
 from src.nodes import render_node
 from tests.conftest import make_exercise
 
-GOLDEN = Path("samples/romanian_deadlift_spec.json").resolve()
+GOLDEN = Path("samples/specs/romanian_deadlift_barbell.json").resolve()
 
 
 def golden_spec() -> AnimationSpec:
@@ -107,3 +107,32 @@ def test_stale_output_is_deleted_before_rendering(monkeypatch, tmp_path):
 
     # Assert
     assert not stale.exists()
+
+
+def test_spec_is_saved_next_to_the_media(monkeypatch, tmp_path):
+    # Arrange
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr(render_node, "render_animation", lambda *a: a[-1])
+    monkeypatch.setattr(render_node, "extract_still", lambda *a: None)
+
+    # Act
+    render_node.render_exercise_animation({"structured_exercise": make_exercise(), "animation_spec": golden_spec()})
+
+    # Assert
+    saved = tmp_path / "media" / "specs" / "romanian_deadlift_barbell.json"
+    assert AnimationSpec.model_validate_json(saved.read_text(encoding="utf-8")) == golden_spec()
+
+
+def test_fallback_spec_is_rendered_when_no_spec_was_approved(monkeypatch, tmp_path):
+    # Arrange
+    monkeypatch.chdir(tmp_path)
+    rendered = []
+    monkeypatch.setattr(render_node, "render_animation", lambda spec, *a: rendered.append(spec) or a[-1])
+    monkeypatch.setattr(render_node, "extract_still", lambda *a: None)
+
+    # Act
+    render_node.render_exercise_animation(
+        {"structured_exercise": make_exercise(), "animation_spec": None, "fallback_spec": golden_spec()})
+
+    # Assert
+    assert rendered == [golden_spec()]

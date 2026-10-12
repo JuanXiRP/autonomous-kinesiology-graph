@@ -1,0 +1,65 @@
+{
+  "subtitle": "Barbell posterior chain",
+  "setup": {"posture": "standing", "support": "none", "rig": "free", "fixed_contacts": []},
+  "load_attachment": "hands",
+  "balance_over_midfoot": true,
+  "reps": 2,
+  "keyframes": [
+    {
+      "torso": 90,
+      "near_arm": {"proximal": 270, "distal": 270},
+      "near_leg": {"proximal": 270, "distal": 270},
+      "duration_s": 1.0, "hold_s": 0.6, "active_step": 0,
+      "muscle_activation": [
+        {"region": "hamstrings", "level": 0.15}, {"region": "glutes", "level": 0.2}, {"region": "lower_back", "level": 0.3}, {"region": "forearms", "level": 0.4}
+      ]
+    },
+    {
+      "torso": 52,
+      "near_arm": {"proximal": 262, "distal": 262},
+      "near_leg": {"proximal": 286, "distal": 268},
+      "duration_s": 1.2, "hold_s": 0.2, "active_step": 1,
+      "muscle_activation": [
+        {"region": "hamstrings", "level": 0.55}, {"region": "glutes", "level": 0.45}, {"region": "lower_back", "level": 0.55}, {"region": "forearms", "level": 0.4}
+      ]
+    },
+    {
+      "torso": 18,
+      "near_arm": {"proximal": 254, "distal": 252},
+      "near_leg": {"proximal": 302, "distal": 266},
+      "duration_s": 1.2, "hold_s": 0.6, "active_step": 2,
+      "muscle_activation": [
+        {"region": "hamstrings", "level": 1.0}, {"region": "glutes", "level": 0.75}, {"region": "lower_back", "level": 0.65}, {"region": "forearms", "level": 0.4}
+      ]
+    },
+    {
+      "torso": 52,
+      "near_arm": {"proximal": 262, "distal": 262},
+      "near_leg": {"proximal": 286, "distal": 268},
+      "duration_s": 1.3, "hold_s": 0.0, "active_step": 3,
+      "muscle_activation": [
+        {"region": "hamstrings", "level": 0.7}, {"region": "glutes", "level": 0.9}, {"region": "lower_back", "level": 0.55}, {"region": "forearms", "level": 0.4}
+      ]
+    },
+    {
+      "torso": 90,
+      "near_arm": {"proximal": 270, "distal": 270},
+      "near_leg": {"proximal": 270, "distal": 270},
+      "duration_s": 1.0, "hold_s": 0.4, "active_step": 3,
+      "muscle_activation": [
+        {"region": "hamstrings", "level": 0.15}, {"region": "glutes", "level": 1.0}, {"region": "lower_back", "level": 0.3}, {"region": "forearms", "level": 0.4}
+      ]
+    }
+  ],
+  "steps": [
+    {"title": "Hip hinge", "description": "Push the pelvis backward, soft knees, neutral flat spine."},
+    {"title": "Vertical bar path", "description": "Keep the barbell skimming the thighs and shins."},
+    {"title": "Hamstring stretch", "description": "Lower to mid-shin without rounding the lumbar spine."},
+    {"title": "Hip drive", "description": "Drive hips forward, squeezing glutes and hamstrings to lockout."}
+  ],
+  "force_vectors": [
+    {"kind": "load", "anchor": "load", "angle_deg": 270, "magnitude": 1.1, "label": "Load", "active_steps": [1, 2]},
+    {"kind": "muscle_pull", "anchor": "hip", "angle_deg": 0, "magnitude": 1.0, "label": "Hip drive", "active_steps": [3]}
+  ],
+  "angle_markers": ["hip", "knee"]
+}

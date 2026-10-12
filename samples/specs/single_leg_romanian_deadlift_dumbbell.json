@@ -1,0 +1,70 @@
+{
+  "subtitle": "Unilateral posterior chain",
+  "setup": {"posture": "standing", "support": "none", "rig": "free", "fixed_contacts": []},
+  "load_attachment": "hands",
+  "balance_over_midfoot": true,
+  "reps": 2,
+  "keyframes": [
+    {
+      "torso": 90,
+      "near_arm": {"proximal": 270, "distal": 270},
+      "near_leg": {"proximal": 270, "distal": 270},
+      "far_leg": {"proximal": 255, "distal": 235},
+      "duration_s": 1.0, "hold_s": 0.6, "active_step": 0,
+      "muscle_activation": [
+        {"region": "hamstrings", "level": 0.2}, {"region": "glutes", "level": 0.3}, {"region": "lower_back", "level": 0.3}, {"region": "forearms", "level": 0.4}
+      ]
+    },
+    {
+      "torso": 48,
+      "near_arm": {"proximal": 256, "distal": 254},
+      "near_leg": {"proximal": 286, "distal": 268},
+      "far_leg": {"proximal": 230, "distal": 226},
+      "duration_s": 1.3, "hold_s": 0.2, "active_step": 1,
+      "muscle_activation": [
+        {"region": "hamstrings", "level": 0.6}, {"region": "glutes", "level": 0.55}, {"region": "lower_back", "level": 0.5}, {"region": "forearms", "level": 0.4}
+      ]
+    },
+    {
+      "torso": 14,
+      "near_arm": {"proximal": 250, "distal": 248},
+      "near_leg": {"proximal": 298, "distal": 266},
+      "far_leg": {"proximal": 196, "distal": 194},
+      "duration_s": 1.3, "hold_s": 0.6, "active_step": 2,
+      "muscle_activation": [
+        {"region": "hamstrings", "level": 1.0}, {"region": "glutes", "level": 0.8}, {"region": "lower_back", "level": 0.6}, {"region": "forearms", "level": 0.4}
+      ]
+    },
+    {
+      "torso": 48,
+      "near_arm": {"proximal": 256, "distal": 254},
+      "near_leg": {"proximal": 286, "distal": 268},
+      "far_leg": {"proximal": 230, "distal": 226},
+      "duration_s": 1.3, "hold_s": 0.0, "active_step": 3,
+      "muscle_activation": [
+        {"region": "hamstrings", "level": 0.7}, {"region": "glutes", "level": 0.95}, {"region": "lower_back", "level": 0.5}, {"region": "forearms", "level": 0.4}
+      ]
+    },
+    {
+      "torso": 90,
+      "near_arm": {"proximal": 270, "distal": 270},
+      "near_leg": {"proximal": 270, "distal": 270},
+      "far_leg": {"proximal": 255, "distal": 235},
+      "duration_s": 1.0, "hold_s": 0.4, "active_step": 3,
+      "muscle_activation": [
+        {"region": "hamstrings", "level": 0.2}, {"region": "glutes", "level": 1.0}, {"region": "lower_back", "level": 0.3}, {"region": "forearms", "level": 0.4}
+      ]
+    }
+  ],
+  "steps": [
+    {"title": "Stance and brace", "description": "Soft stance knee, braced core, hips square to the floor."},
+    {"title": "Hinge and reach back", "description": "Hinge at the hip while the free leg extends straight back."},
+    {"title": "Hamstring stretch", "description": "Torso and free leg form one line, near parallel to the floor."},
+    {"title": "Drive to lockout", "description": "Push through the stance midfoot and squeeze the glute to stand tall."}
+  ],
+  "force_vectors": [
+    {"kind": "load", "anchor": "load", "angle_deg": 270, "magnitude": 1.0, "label": "Dumbbell", "active_steps": [1, 2]},
+    {"kind": "muscle_pull", "anchor": "hip", "angle_deg": 0, "magnitude": 0.9, "label": "Hip drive", "active_steps": [3]}
+  ],
+  "angle_markers": ["hip", "knee"]
+}

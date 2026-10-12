@@ -1,0 +1,56 @@
+{
+  "subtitle": "Machine knee-dominant press",
+  "setup": {"posture": "seated", "support": "seat_with_backrest", "support_angle_deg": 45, "rig": "machine_linear", "fixed_contacts": []},
+  "load_attachment": "feet",
+  "balance_over_midfoot": false,
+  "reps": 2,
+  "keyframes": [
+    {
+      "torso": 135,
+      "near_arm": {"proximal": 290, "distal": 330},
+      "near_leg": {"target": {"angle_deg": 38, "reach": 0.97}},
+      "duration_s": 1.0, "hold_s": 0.4, "active_step": 0,
+      "muscle_activation": [
+        {"region": "quadriceps", "level": 0.4}, {"region": "glutes", "level": 0.3}
+      ]
+    },
+    {
+      "torso": 135,
+      "near_arm": {"proximal": 290, "distal": 330},
+      "near_leg": {"target": {"angle_deg": 38, "reach": 0.72}},
+      "duration_s": 1.0, "hold_s": 0.0, "active_step": 1,
+      "muscle_activation": [
+        {"region": "quadriceps", "level": 0.75}, {"region": "glutes", "level": 0.6}
+      ]
+    },
+    {
+      "torso": 135,
+      "near_arm": {"proximal": 290, "distal": 330},
+      "near_leg": {"target": {"angle_deg": 38, "reach": 0.5}},
+      "duration_s": 0.8, "hold_s": 0.4, "active_step": 2,
+      "muscle_activation": [
+        {"region": "quadriceps", "level": 1.0}, {"region": "glutes", "level": 0.85}, {"region": "hamstrings", "level": 0.3}
+      ]
+    },
+    {
+      "torso": 135,
+      "near_arm": {"proximal": 290, "distal": 330},
+      "near_leg": {"target": {"angle_deg": 38, "reach": 0.97}},
+      "duration_s": 1.1, "hold_s": 0.3, "active_step": 3,
+      "muscle_activation": [
+        {"region": "quadriceps", "level": 0.6}, {"region": "glutes", "level": 0.5}
+      ]
+    }
+  ],
+  "steps": [
+    {"title": "Set the feet", "description": "Feet shoulder-width on the platform, back flat on the pad."},
+    {"title": "Lower the sled", "description": "Bend the knees towards the chest, lower back stays down."},
+    {"title": "Deep position", "description": "Knees about 90-100°, heels on the platform."},
+    {"title": "Press out", "description": "Drive the platform away without locking the knees hard."}
+  ],
+  "force_vectors": [
+    {"kind": "muscle_pull", "anchor": "load", "angle_deg": 38, "magnitude": 0.9, "label": "Leg drive", "active_steps": [3]},
+    {"kind": "load", "anchor": "load", "angle_deg": 218, "magnitude": 0.8, "label": "Sled", "active_steps": [1, 2]}
+  ],
+  "angle_markers": ["knee"]
+}

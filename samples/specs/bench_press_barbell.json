@@ -1,0 +1,65 @@
+{
+  "subtitle": "Barbell horizontal press",
+  "setup": {"posture": "supine", "support": "flat_bench", "support_angle_deg": 0, "rig": "free", "fixed_contacts": ["near_foot"]},
+  "load_attachment": "hands",
+  "balance_over_midfoot": false,
+  "reps": 2,
+  "keyframes": [
+    {
+      "torso": 180,
+      "near_arm": {"target": {"angle_deg": 90, "reach": 0.98}},
+      "near_leg": {"proximal": 345, "distal": 275},
+      "duration_s": 1.0, "hold_s": 0.5, "active_step": 0,
+      "muscle_activation": [
+        {"region": "chest", "level": 0.3}, {"region": "triceps", "level": 0.4}, {"region": "shoulders", "level": 0.3}
+      ]
+    },
+    {
+      "torso": 180,
+      "near_arm": {"target": {"angle_deg": 66, "reach": 0.62}},
+      "near_leg": {"proximal": 345, "distal": 275},
+      "duration_s": 1.1, "hold_s": 0.0, "active_step": 1,
+      "muscle_activation": [
+        {"region": "chest", "level": 0.65}, {"region": "triceps", "level": 0.45}, {"region": "shoulders", "level": 0.5}
+      ]
+    },
+    {
+      "torso": 180,
+      "near_arm": {"target": {"angle_deg": 50, "reach": 0.33}},
+      "near_leg": {"proximal": 345, "distal": 275},
+      "duration_s": 0.9, "hold_s": 0.4, "active_step": 2,
+      "muscle_activation": [
+        {"region": "chest", "level": 1.0}, {"region": "triceps", "level": 0.55}, {"region": "shoulders", "level": 0.65}
+      ]
+    },
+    {
+      "torso": 180,
+      "near_arm": {"target": {"angle_deg": 72, "reach": 0.68}},
+      "near_leg": {"proximal": 345, "distal": 275},
+      "duration_s": 0.8, "hold_s": 0.0, "active_step": 3,
+      "muscle_activation": [
+        {"region": "chest", "level": 0.9}, {"region": "triceps", "level": 0.85}, {"region": "shoulders", "level": 0.6}
+      ]
+    },
+    {
+      "torso": 180,
+      "near_arm": {"target": {"angle_deg": 90, "reach": 0.98}},
+      "near_leg": {"proximal": 345, "distal": 275},
+      "duration_s": 0.7, "hold_s": 0.4, "active_step": 3,
+      "muscle_activation": [
+        {"region": "chest", "level": 0.4}, {"region": "triceps", "level": 0.9}, {"region": "shoulders", "level": 0.35}
+      ]
+    }
+  ],
+  "steps": [
+    {"title": "Set the arch", "description": "Retract the shoulder blades, plant the feet, bar over the shoulders."},
+    {"title": "Controlled descent", "description": "Lower the bar to the lower chest with elbows tucked at about 60°."},
+    {"title": "Touch the sternum", "description": "Light touch on the chest, forearms vertical, no bounce."},
+    {"title": "Press to lockout", "description": "Drive the bar up and slightly back over the shoulders."}
+  ],
+  "force_vectors": [
+    {"kind": "load", "anchor": "load", "angle_deg": 270, "magnitude": 1.0, "label": "Load", "active_steps": [1, 2]},
+    {"kind": "muscle_pull", "anchor": "load", "angle_deg": 95, "magnitude": 1.0, "label": "Press", "active_steps": [3]}
+  ],
+  "angle_markers": ["elbow"]
+}

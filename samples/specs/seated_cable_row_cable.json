@@ -1,0 +1,55 @@
+{
+  "subtitle": "Cable horizontal pull",
+  "setup": {"posture": "seated", "support": "seat", "support_angle_deg": 0, "rig": "cable", "cable": {"height": "mid", "side": "front"}, "fixed_contacts": ["near_foot"]},
+  "load_attachment": "hands",
+  "balance_over_midfoot": false,
+  "reps": 2,
+  "keyframes": [
+    {
+      "torso": 80,
+      "near_arm": {"target": {"angle_deg": 352, "reach": 0.98}},
+      "near_leg": {"proximal": 350, "distal": 280},
+      "duration_s": 1.0, "hold_s": 0.4, "active_step": 0,
+      "muscle_activation": [
+        {"region": "lats", "level": 0.45}, {"region": "upper_back", "level": 0.45}, {"region": "forearms", "level": 0.5}
+      ]
+    },
+    {
+      "torso": 90,
+      "near_arm": {"target": {"angle_deg": 318, "reach": 0.6}},
+      "near_leg": {"proximal": 350, "distal": 280},
+      "duration_s": 0.8, "hold_s": 0.0, "active_step": 1,
+      "muscle_activation": [
+        {"region": "lats", "level": 0.8}, {"region": "upper_back", "level": 0.8}, {"region": "biceps", "level": 0.6}, {"region": "forearms", "level": 0.5}
+      ]
+    },
+    {
+      "torso": 92,
+      "near_arm": {"target": {"angle_deg": 282, "reach": 0.42}},
+      "near_leg": {"proximal": 350, "distal": 280},
+      "duration_s": 0.5, "hold_s": 0.5, "active_step": 1,
+      "muscle_activation": [
+        {"region": "lats", "level": 1.0}, {"region": "upper_back", "level": 1.0}, {"region": "biceps", "level": 0.7}, {"region": "forearms", "level": 0.5}
+      ]
+    },
+    {
+      "torso": 80,
+      "near_arm": {"target": {"angle_deg": 352, "reach": 0.98}},
+      "near_leg": {"proximal": 350, "distal": 280},
+      "duration_s": 1.3, "hold_s": 0.3, "active_step": 2,
+      "muscle_activation": [
+        {"region": "lats", "level": 0.45}, {"region": "upper_back", "level": 0.45}, {"region": "forearms", "level": 0.5}
+      ]
+    }
+  ],
+  "steps": [
+    {"title": "Sit tall", "description": "Feet on the plate, knees soft, chest up and arms long."},
+    {"title": "Row to the waist", "description": "Pull the handle to the belly, elbows close to the ribs."},
+    {"title": "Controlled reach", "description": "Let the arms extend and the shoulder blades glide forward."}
+  ],
+  "force_vectors": [
+    {"kind": "muscle_pull", "anchor": "elbow", "angle_deg": 180, "magnitude": 0.8, "label": "Row", "active_steps": [1]},
+    {"kind": "load", "anchor": "load", "angle_deg": 0, "magnitude": 0.8, "label": "Cable", "active_steps": [2]}
+  ],
+  "angle_markers": ["elbow"]
+}

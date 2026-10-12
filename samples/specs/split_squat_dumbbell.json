@@ -1,0 +1,70 @@
+{
+  "subtitle": "Unilateral knee-dominant squat",
+  "setup": {"posture": "standing", "support": "none", "support_angle_deg": 0, "rig": "free", "fixed_contacts": ["far_foot"]},
+  "load_attachment": "hands",
+  "balance_over_midfoot": false,
+  "reps": 2,
+  "keyframes": [
+    {
+      "torso": 90,
+      "near_arm": {"proximal": 270, "distal": 270},
+      "near_leg": {"proximal": 285, "distal": 268},
+      "far_leg": {"proximal": 245, "distal": 250},
+      "duration_s": 1.0, "hold_s": 0.5, "active_step": 0,
+      "muscle_activation": [
+        {"region": "quadriceps", "level": 0.3}, {"region": "glutes", "level": 0.3}, {"region": "forearms", "level": 0.4}
+      ]
+    },
+    {
+      "torso": 88,
+      "near_arm": {"proximal": 270, "distal": 270},
+      "near_leg": {"proximal": 325, "distal": 266},
+      "far_leg": {"proximal": 255, "distal": 205},
+      "duration_s": 1.1, "hold_s": 0.0, "active_step": 1,
+      "muscle_activation": [
+        {"region": "quadriceps", "level": 0.65}, {"region": "glutes", "level": 0.55}, {"region": "forearms", "level": 0.4}
+      ]
+    },
+    {
+      "torso": 87,
+      "near_arm": {"proximal": 270, "distal": 270},
+      "near_leg": {"proximal": 357, "distal": 266},
+      "far_leg": {"proximal": 268, "distal": 185},
+      "duration_s": 0.9, "hold_s": 0.4, "active_step": 2,
+      "muscle_activation": [
+        {"region": "quadriceps", "level": 1.0}, {"region": "glutes", "level": 0.9}, {"region": "forearms", "level": 0.4}
+      ]
+    },
+    {
+      "torso": 88,
+      "near_arm": {"proximal": 270, "distal": 270},
+      "near_leg": {"proximal": 325, "distal": 266},
+      "far_leg": {"proximal": 255, "distal": 205},
+      "duration_s": 0.9, "hold_s": 0.0, "active_step": 3,
+      "muscle_activation": [
+        {"region": "quadriceps", "level": 0.85}, {"region": "glutes", "level": 0.8}, {"region": "forearms", "level": 0.4}
+      ]
+    },
+    {
+      "torso": 90,
+      "near_arm": {"proximal": 270, "distal": 270},
+      "near_leg": {"proximal": 285, "distal": 268},
+      "far_leg": {"proximal": 245, "distal": 250},
+      "duration_s": 0.8, "hold_s": 0.4, "active_step": 3,
+      "muscle_activation": [
+        {"region": "quadriceps", "level": 0.4}, {"region": "glutes", "level": 0.5}, {"region": "forearms", "level": 0.4}
+      ]
+    }
+  ],
+  "steps": [
+    {"title": "Split stance", "description": "Long stance, back heel up, torso tall, dumbbells at the sides."},
+    {"title": "Drop straight down", "description": "Lower the back knee towards the floor, front shin nearly vertical."},
+    {"title": "Bottom position", "description": "Back knee just above the floor, front thigh parallel."},
+    {"title": "Drive through front", "description": "Push through the front mid-foot to stand up."}
+  ],
+  "force_vectors": [
+    {"kind": "load", "anchor": "load", "angle_deg": 270, "magnitude": 0.9, "label": "Dumbbells", "active_steps": [1, 2]},
+    {"kind": "ground_reaction", "anchor": "ankle", "angle_deg": 90, "magnitude": 0.9, "label": "Front leg", "active_steps": [3]}
+  ],
+  "angle_markers": ["knee"]
+}

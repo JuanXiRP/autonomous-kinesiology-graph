@@ -1,0 +1,55 @@
+{
+  "subtitle": "Cable elbow extension",
+  "setup": {"posture": "standing", "support": "none", "support_angle_deg": 0, "rig": "cable", "cable": {"height": "high", "side": "front"}, "fixed_contacts": []},
+  "load_attachment": "hands",
+  "balance_over_midfoot": false,
+  "reps": 2,
+  "keyframes": [
+    {
+      "torso": 84,
+      "near_arm": {"proximal": 276, "distal": 405},
+      "near_leg": {"proximal": 276, "distal": 268},
+      "duration_s": 1.0, "hold_s": 0.4, "active_step": 0,
+      "muscle_activation": [
+        {"region": "triceps", "level": 0.35}, {"region": "forearms", "level": 0.4}, {"region": "abs", "level": 0.3}
+      ]
+    },
+    {
+      "torso": 84,
+      "near_arm": {"proximal": 276, "distal": 335},
+      "near_leg": {"proximal": 276, "distal": 268},
+      "duration_s": 0.7, "hold_s": 0.0, "active_step": 1,
+      "muscle_activation": [
+        {"region": "triceps", "level": 0.8}, {"region": "forearms", "level": 0.5}, {"region": "abs", "level": 0.3}
+      ]
+    },
+    {
+      "torso": 84,
+      "near_arm": {"proximal": 276, "distal": 276},
+      "near_leg": {"proximal": 276, "distal": 268},
+      "duration_s": 0.5, "hold_s": 0.5, "active_step": 1,
+      "muscle_activation": [
+        {"region": "triceps", "level": 1.0}, {"region": "forearms", "level": 0.5}, {"region": "abs", "level": 0.3}
+      ]
+    },
+    {
+      "torso": 84,
+      "near_arm": {"proximal": 276, "distal": 405},
+      "near_leg": {"proximal": 276, "distal": 268},
+      "duration_s": 1.2, "hold_s": 0.3, "active_step": 2,
+      "muscle_activation": [
+        {"region": "triceps", "level": 0.35}, {"region": "forearms", "level": 0.4}, {"region": "abs", "level": 0.3}
+      ]
+    }
+  ],
+  "steps": [
+    {"title": "Set the elbows", "description": "Slight forward lean, elbows pinned to the sides."},
+    {"title": "Push down", "description": "Extend the elbows until the arms are straight."},
+    {"title": "Controlled return", "description": "Let the hands rise to chest height, elbows still."}
+  ],
+  "force_vectors": [
+    {"kind": "muscle_pull", "anchor": "load", "angle_deg": 270, "magnitude": 0.8, "label": "Extend", "active_steps": [1]},
+    {"kind": "load", "anchor": "load", "angle_deg": 90, "magnitude": 0.8, "label": "Cable", "active_steps": [2]}
+  ],
+  "angle_markers": ["elbow"]
+}

@@ -46,11 +46,18 @@ def render_frame(spec: AnimationSpec, title: str, equipment: str, target_muscles
     """Renders a single frame (fast preview while iterating on the scene)."""
     return _render(spec, title, equipment, target_muscles, Path(image_path), still_at=at_seconds)
 
-def _render(spec, title, equipment, target_muscles, output_path: Path, still_at: float | None) -> Path:
-    with RENDER_SLOTS:
-        return _render_unlocked(spec, title, equipment, target_muscles, output_path, still_at)
+def render_frames(spec: AnimationSpec, title: str, equipment: str, target_muscles: list[str],
+                  times: list[float], video_path: Path) -> Path:
+    """Renders a short video holding one frame per requested time (one Manim run for several stills)."""
+    return _render(spec, title, equipment, target_muscles, Path(video_path), still_at=None, frame_times=times)
 
-def _render_unlocked(spec, title, equipment, target_muscles, output_path: Path, still_at: float | None) -> Path:
+def _render(spec, title, equipment, target_muscles, output_path: Path, still_at: float | None,
+            frame_times: list[float] | None = None) -> Path:
+    with RENDER_SLOTS:
+        return _render_unlocked(spec, title, equipment, target_muscles, output_path, still_at, frame_times)
+
+def _render_unlocked(spec, title, equipment, target_muscles, output_path: Path, still_at: float | None,
+                     frame_times: list[float] | None = None) -> Path:
     output_path.parent.mkdir(parents=True, exist_ok=True)
     output_path.unlink(missing_ok=True)
 
@@ -69,6 +76,8 @@ def _render_unlocked(spec, title, equipment, target_muscles, output_path: Path, 
         env["PYTHONPATH"] = os.getcwd() + os.pathsep + env.get("PYTHONPATH", "")
         if still_at is not None:
             env["EXERCISE_STILL_AT"] = str(still_at)
+        if frame_times:
+            env["EXERCISE_STORYBOARD"] = ",".join(f"{t:.3f}" for t in frame_times)
 
         command = [
             sys.executable, "-m", "manim", "render",

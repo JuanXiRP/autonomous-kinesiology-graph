@@ -1,0 +1,65 @@
+{
+  "subtitle": "Barbell knee-dominant squat",
+  "setup": {"posture": "standing", "support": "none", "support_angle_deg": 0, "rig": "free", "fixed_contacts": []},
+  "load_attachment": "shoulders",
+  "balance_over_midfoot": true,
+  "reps": 2,
+  "keyframes": [
+    {
+      "torso": 90,
+      "near_arm": {"proximal": 270, "distal": 270},
+      "near_leg": {"proximal": 270, "distal": 270},
+      "duration_s": 1.0, "hold_s": 0.5, "active_step": 0,
+      "muscle_activation": [
+        {"region": "quadriceps", "level": 0.3}, {"region": "glutes", "level": 0.25}, {"region": "lower_back", "level": 0.3}
+      ]
+    },
+    {
+      "torso": 70,
+      "near_arm": {"proximal": 270, "distal": 270},
+      "near_leg": {"proximal": 316, "distal": 247},
+      "duration_s": 1.1, "hold_s": 0.0, "active_step": 1,
+      "muscle_activation": [
+        {"region": "quadriceps", "level": 0.65}, {"region": "glutes", "level": 0.5}, {"region": "lower_back", "level": 0.45}
+      ]
+    },
+    {
+      "torso": 52,
+      "near_arm": {"proximal": 270, "distal": 270},
+      "near_leg": {"proximal": 352, "distal": 238},
+      "duration_s": 0.9, "hold_s": 0.4, "active_step": 2,
+      "muscle_activation": [
+        {"region": "quadriceps", "level": 1.0}, {"region": "glutes", "level": 0.85}, {"region": "hamstrings", "level": 0.4}, {"region": "lower_back", "level": 0.6}
+      ]
+    },
+    {
+      "torso": 70,
+      "near_arm": {"proximal": 270, "distal": 270},
+      "near_leg": {"proximal": 316, "distal": 247},
+      "duration_s": 0.9, "hold_s": 0.0, "active_step": 3,
+      "muscle_activation": [
+        {"region": "quadriceps", "level": 0.85}, {"region": "glutes", "level": 0.9}, {"region": "lower_back", "level": 0.5}
+      ]
+    },
+    {
+      "torso": 90,
+      "near_arm": {"proximal": 270, "distal": 270},
+      "near_leg": {"proximal": 270, "distal": 270},
+      "duration_s": 0.8, "hold_s": 0.4, "active_step": 3,
+      "muscle_activation": [
+        {"region": "quadriceps", "level": 0.4}, {"region": "glutes", "level": 0.6}, {"region": "lower_back", "level": 0.3}
+      ]
+    }
+  ],
+  "steps": [
+    {"title": "Brace and unrack", "description": "Bar on the upper back, big breath, feet shoulder-width apart."},
+    {"title": "Sit down and back", "description": "Break at hips and knees together, knees track over the toes."},
+    {"title": "Hit depth", "description": "Hip crease below the knee, chest up, bar over mid-foot."},
+    {"title": "Drive up", "description": "Push the floor away and lead with the chest to lockout."}
+  ],
+  "force_vectors": [
+    {"kind": "load", "anchor": "load", "angle_deg": 270, "magnitude": 1.0, "label": "Load", "active_steps": [1, 2]},
+    {"kind": "ground_reaction", "anchor": "ankle", "angle_deg": 90, "magnitude": 0.9, "label": "Leg drive", "active_steps": [3]}
+  ],
+  "angle_markers": ["knee", "hip"]
+}

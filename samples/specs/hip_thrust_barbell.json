@@ -1,0 +1,56 @@
+{
+  "subtitle": "Barbell hip extension",
+  "setup": {"posture": "bridge", "support": "flat_bench", "support_angle_deg": 0, "rig": "free", "fixed_contacts": ["near_foot"]},
+  "load_attachment": "hips",
+  "balance_over_midfoot": false,
+  "reps": 2,
+  "keyframes": [
+    {
+      "torso": 150,
+      "near_arm": {"proximal": 270, "distal": 270},
+      "near_leg": {"proximal": 12, "distal": 285},
+      "duration_s": 1.0, "hold_s": 0.4, "active_step": 0,
+      "muscle_activation": [
+        {"region": "glutes", "level": 0.4}, {"region": "hamstrings", "level": 0.3}, {"region": "quadriceps", "level": 0.3}
+      ]
+    },
+    {
+      "torso": 165,
+      "near_arm": {"proximal": 270, "distal": 270},
+      "near_leg": {"proximal": 12, "distal": 285},
+      "duration_s": 0.8, "hold_s": 0.0, "active_step": 1,
+      "muscle_activation": [
+        {"region": "glutes", "level": 0.8}, {"region": "hamstrings", "level": 0.5}, {"region": "quadriceps", "level": 0.4}
+      ]
+    },
+    {
+      "torso": 180,
+      "near_arm": {"proximal": 270, "distal": 270},
+      "near_leg": {"proximal": 12, "distal": 285},
+      "duration_s": 0.6, "hold_s": 0.6, "active_step": 2,
+      "muscle_activation": [
+        {"region": "glutes", "level": 1.0}, {"region": "hamstrings", "level": 0.6}, {"region": "quadriceps", "level": 0.4}, {"region": "abs", "level": 0.4}
+      ]
+    },
+    {
+      "torso": 150,
+      "near_arm": {"proximal": 270, "distal": 270},
+      "near_leg": {"proximal": 12, "distal": 285},
+      "duration_s": 1.2, "hold_s": 0.3, "active_step": 3,
+      "muscle_activation": [
+        {"region": "glutes", "level": 0.4}, {"region": "hamstrings", "level": 0.3}, {"region": "quadriceps", "level": 0.3}
+      ]
+    }
+  ],
+  "steps": [
+    {"title": "Bench setup", "description": "Shoulder blades on the bench edge, bar over the hip crease."},
+    {"title": "Drive the hips up", "description": "Push through the heels, chin tucked, ribs down."},
+    {"title": "Lockout squeeze", "description": "Torso parallel to the floor, shins vertical, glutes tight."},
+    {"title": "Lower with control", "description": "Let the hips sink without losing the brace."}
+  ],
+  "force_vectors": [
+    {"kind": "muscle_pull", "anchor": "hip", "angle_deg": 90, "magnitude": 0.9, "label": "Hip drive", "active_steps": [1, 2]},
+    {"kind": "load", "anchor": "load", "angle_deg": 270, "magnitude": 0.8, "label": "Load", "active_steps": [3]}
+  ],
+  "angle_markers": ["hip", "knee"]
+}

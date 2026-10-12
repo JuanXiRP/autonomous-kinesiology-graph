@@ -1,0 +1,56 @@
+{
+  "subtitle": "Bodyweight vertical press",
+  "setup": {"posture": "hanging", "support": "parallel_bars", "support_angle_deg": 0, "rig": "free", "fixed_contacts": []},
+  "load_attachment": "none",
+  "balance_over_midfoot": false,
+  "reps": 2,
+  "keyframes": [
+    {
+      "torso": 86,
+      "near_arm": {"proximal": 270, "distal": 270},
+      "near_leg": {"proximal": 288, "distal": 215},
+      "duration_s": 1.0, "hold_s": 0.4, "active_step": 0,
+      "muscle_activation": [
+        {"region": "triceps", "level": 0.5}, {"region": "chest", "level": 0.4}, {"region": "shoulders", "level": 0.4}
+      ]
+    },
+    {
+      "torso": 80,
+      "near_arm": {"target": {"angle_deg": 278, "reach": 0.66}},
+      "near_leg": {"proximal": 288, "distal": 215},
+      "duration_s": 0.9, "hold_s": 0.0, "active_step": 1,
+      "muscle_activation": [
+        {"region": "triceps", "level": 0.75}, {"region": "chest", "level": 0.75}, {"region": "shoulders", "level": 0.6}
+      ]
+    },
+    {
+      "torso": 76,
+      "near_arm": {"target": {"angle_deg": 282, "reach": 0.45}},
+      "near_leg": {"proximal": 288, "distal": 215},
+      "duration_s": 0.6, "hold_s": 0.4, "active_step": 2,
+      "muscle_activation": [
+        {"region": "triceps", "level": 1.0}, {"region": "chest", "level": 1.0}, {"region": "shoulders", "level": 0.75}
+      ]
+    },
+    {
+      "torso": 86,
+      "near_arm": {"proximal": 270, "distal": 270},
+      "near_leg": {"proximal": 288, "distal": 215},
+      "duration_s": 0.9, "hold_s": 0.3, "active_step": 3,
+      "muscle_activation": [
+        {"region": "triceps", "level": 0.9}, {"region": "chest", "level": 0.6}, {"region": "shoulders", "level": 0.5}
+      ]
+    }
+  ],
+  "steps": [
+    {"title": "Support on the bars", "description": "Arms locked, shoulders down, slight forward lean."},
+    {"title": "Lower under control", "description": "Bend the elbows back until the upper arms are parallel."},
+    {"title": "Bottom stretch", "description": "Shoulders just below the elbows, chest forward."},
+    {"title": "Press to lockout", "description": "Drive the hands into the bars to straight arms."}
+  ],
+  "force_vectors": [
+    {"kind": "load", "anchor": "hip", "angle_deg": 270, "magnitude": 0.9, "label": "Bodyweight", "active_steps": [1, 2]},
+    {"kind": "muscle_pull", "anchor": "shoulder", "angle_deg": 90, "magnitude": 0.8, "label": "Press", "active_steps": [3]}
+  ],
+  "angle_markers": ["elbow"]
+}

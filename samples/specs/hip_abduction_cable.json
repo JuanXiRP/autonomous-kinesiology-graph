@@ -1,0 +1,60 @@
+{
+  "subtitle": "Cable hip abduction",
+  "view": "front",
+  "setup": {"posture": "standing", "support": "none", "support_angle_deg": 0, "rig": "cable", "cable": {"height": "low", "side": "back"}, "fixed_contacts": []},
+  "load_attachment": "feet",
+  "balance_over_midfoot": false,
+  "reps": 2,
+  "keyframes": [
+    {
+      "torso": 90,
+      "near_arm": {"proximal": 272, "distal": 272},
+      "near_leg": {"proximal": 270, "distal": 270},
+      "far_leg": {"proximal": 270, "distal": 270},
+      "duration_s": 1.0, "hold_s": 0.4, "active_step": 0,
+      "muscle_activation": [
+        {"region": "abductors", "level": 0.35}, {"region": "glutes", "level": 0.3}
+      ]
+    },
+    {
+      "torso": 90,
+      "near_arm": {"proximal": 272, "distal": 272},
+      "near_leg": {"proximal": 292, "distal": 292},
+      "far_leg": {"proximal": 270, "distal": 270},
+      "duration_s": 0.8, "hold_s": 0.0, "active_step": 1,
+      "muscle_activation": [
+        {"region": "abductors", "level": 0.8}, {"region": "glutes", "level": 0.6}
+      ]
+    },
+    {
+      "torso": 90,
+      "near_arm": {"proximal": 272, "distal": 272},
+      "near_leg": {"proximal": 308, "distal": 308},
+      "far_leg": {"proximal": 270, "distal": 270},
+      "duration_s": 0.6, "hold_s": 0.5, "active_step": 1,
+      "muscle_activation": [
+        {"region": "abductors", "level": 1.0}, {"region": "glutes", "level": 0.75}
+      ]
+    },
+    {
+      "torso": 90,
+      "near_arm": {"proximal": 272, "distal": 272},
+      "near_leg": {"proximal": 270, "distal": 270},
+      "far_leg": {"proximal": 270, "distal": 270},
+      "duration_s": 1.2, "hold_s": 0.3, "active_step": 2,
+      "muscle_activation": [
+        {"region": "abductors", "level": 0.35}, {"region": "glutes", "level": 0.3}
+      ]
+    }
+  ],
+  "steps": [
+    {"title": "Cuff and stance", "description": "Ankle cuff on the outer leg, stand side-on to the low pulley."},
+    {"title": "Sweep the leg out", "description": "Lift the straight leg out to the side, pelvis level."},
+    {"title": "Return with control", "description": "Bring the leg back across without swinging."}
+  ],
+  "force_vectors": [
+    {"kind": "muscle_pull", "anchor": "knee", "angle_deg": 0, "magnitude": 0.8, "label": "Abduct", "active_steps": [1]},
+    {"kind": "load", "anchor": "load", "angle_deg": 200, "magnitude": 0.7, "label": "Cable", "active_steps": [2]}
+  ],
+  "angle_markers": ["hip"]
+}
