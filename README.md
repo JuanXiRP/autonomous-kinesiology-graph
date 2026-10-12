@@ -33,19 +33,21 @@
  Variant resolver (Gemini) ──► DB lookup ──► pick variants in the terminal
         │
         ▼   one LangGraph run per variant, in parallel
- ┌──────────────────────────────────────────────────────────────┐
- │ content ─► animation spec ─► Manim render ─► Storage ─► Postgres │
- │ (Gemini)   (Gemini, checked)   (local, free)                     │
- └──────────────────────────────────────────────────────────────┘
+ ┌────────────────────────────────────────────────────────────────────────────────┐
+ │ content ─► animation spec ─► visual review ─► Manim render ─► Storage ─► Postgres │
+ │ (Gemini)   (Gemini, checked)  (Gemini sees     (local, free)                       │
+ │                               the key poses)                                     │
+ └────────────────────────────────────────────────────────────────────────────────┘
 ```
 
-The key idea: **the LLM does not draw, it describes.** Gemini returns a validated *animation spec* for one repetition: keyframes of joint angles, muscle tension per keyframe, coaching steps, force arrows and the joints whose angles matter. A deterministic renderer built on Manim turns that spec into the video. The output is consistent, technically readable, costs nothing to render, and works for any exercise.
+The key idea: **the LLM does not draw, it describes.** Gemini returns a validated *animation spec* for one repetition: the setup (posture, bench or seat, machine or cable, planted hands and feet), keyframes where each limb is either joint angles or a hand/foot target, muscle tension per keyframe, coaching steps, force arrows and the joints whose angles matter. A deterministic renderer built on Manim solves the pose (inverse kinematics, posture-aware anchoring), draws the bench, rack, machine or cable station from the setup, and turns the spec into the video. The output is consistent, technically readable, costs nothing to render, and covers standing, seated, lying, hanging, plank and bridge exercises in side view, plus frontal-plane movements in front view.
 
 ## Engineering highlights
 
-- **Self-healing LLM loop.** Specs go through two checks. Pydantic validators check structure. A geometry engine then checks anatomy: knees bend forward, joints stay within human limits, the load stays over mid-foot in hinges and squats, and the free leg clears the floor. Each violation is sent back to Gemini as a concrete fix ("the load is 0.6 units in front of mid-foot; push the hips further back"), with up to three attempts.
+- **Self-healing LLM loop.** Specs go through three checks. Pydantic validators check structure. A geometry engine then checks anatomy and physics: joint ranges measured relative to the neighbouring segment (so they hold lying, seated or hanging), the back stays on the bench, planted hands and feet stay within reach, a barbell never passes through the chest, head or bench, machine paths are straight or arcs, and the load stays over mid-foot in hinges and squats. Finally a visual critic renders the key poses and asks Gemini (multimodal) whether a coach would accept them. Each problem goes back to Gemini as a concrete fix ("the load sinks 0.16 units into the torso; move the near_arm target out"), with up to three attempts.
+- **Movement-family examples.** The variant resolver classifies each exercise (hinge, squat, lunge, presses, pulls, curls, raises...) at no extra cost, and the spec prompt shows the hand-tuned sample specs of that family.
 - **Deterministic rendering instead of generative video.** The project started with Imagen and Veo. They were dropped because they could not draw accurate force lines, angles or text, they gave different results on every run, and they were slow and paid. A spec plus a renderer fixed all three.
-- **Pure, tested geometry.** Forward kinematics with fixed bone lengths, grounding, interpolation and collision-aware label placement live in plain Python (`skeleton.py`, `layout.py`). That code is unit-tested without Manim, and the scene only draws.
+- **Pure, tested geometry.** Forward and inverse kinematics with fixed bone lengths, posture-aware anchoring, automatic framing, scenery geometry, the anatomy checks and collision-aware label placement live in plain Python (`skeleton.py`, `kinematics.py`, `checks.py`, `scenery.py`, `layout.py`). That code is unit-tested without Manim, and the scene only draws.
 - **Concurrency where it pays.** Variants run in a thread pool. CPU-bound Manim renders are capped by a semaphore. Uploads are serialised over HTTP/1.1 with retries, after real parallel HTTP/2 uploads failed with dropped connections.
 - **Data integrity.**
   - One deterministic slug rule is shared by the DB lookup, the upsert key and the Storage path.
@@ -53,7 +55,7 @@ The key idea: **the LLM does not draw, it describes.** Gemini returns a validate
   - The upsert never replaces a good media URL with an empty one.
   - Every upload is verified by comparing the remote object size with the local file.
 - **Failure isolation.** Graph nodes never raise. They report errors in the state and the graph decides what to do next. One failing variant never stops the others, and the summary says exactly what happened to each one.
-- **Tested offline.** About 100 tests run with every external client (Gemini, Postgres, Storage, Manim) faked. Opt-in tests run real renders.
+- **Tested offline.** About 200 tests run with every external client (Gemini, Postgres, Storage, Manim) faked, including every sample spec through the geometry checks. Opt-in tests run real renders.
 
 ## Tech stack
 
@@ -72,13 +74,14 @@ main.py                 Interactive CLI: request → variants → concurrent gen
 src/
   graph.py              LangGraph wiring and retry routing
   domain/               Pydantic models: exercise record, animation spec, graph state
-  nodes/                One node per step: content, spec, render, storage, database
-  rendering/            Geometry (skeleton, layout), anatomical body, Manim scene, render runner
+  nodes/                One node per step: content, spec, visual critic, render, storage, database
+  rendering/            Geometry (skeleton, kinematics, checks, scenery, layout), side and front bodies,
+                        Manim scene, storyboard, render runner
   resolution/           Variant resolver (natural language → concrete variants)
   pipeline/             Concurrent execution of the selected variants
   cli/                  Terminal dialogue (Spanish)
   infrastructure/db/    Supabase Storage client and read-only repository
-samples/                Hand-tuned animation specs (prompt examples and test fixtures)
+samples/specs/          Hand-tuned animation specs by movement family (prompt examples and test fixtures)
 render_spec.py          Render any spec locally without API keys
 upload_media.py         Re-upload rendered media for stored exercises
 init_db.py              Database schema
@@ -100,16 +103,17 @@ python init_db.py                 # creates the `exercises` table
 python main.py "peso muerto rumano"
 ```
 
-Each generated variant costs two Gemini calls, plus one call for the variant list, and about 4 minutes of local rendering.
+Each generated variant costs three Gemini calls (content, spec, visual review; more when a spec is retried), plus one call for the variant list, and about 4 minutes of local rendering.
 
 **Try the renderer without any keys:**
 
 ```bash
-python render_spec.py samples/single_leg_romanian_deadlift_spec.json dumbbell "Single-Leg Romanian Deadlift (Dumbbell)"
-# add --frame 3.5 to render a single frame in ~10 seconds
+python render_spec.py samples/specs/bench_press_barbell.json barbell "Bench Press (Barbell)"
+# add --frame 3.5 to render a single frame in ~20 seconds
+python render_spec.py --gallery   # one frame of every sample in a contact sheet
 ```
 
-The output goes to `media/previews/`.
+The output goes to `media/previews/`. Every generated spec is also saved to `media/specs/<slug>.json`, so a pipeline result can be re-rendered for free.
 
 ## Example session
 
@@ -146,7 +150,7 @@ pytest -m slow    # real Manim renders of the sample specs
 ## Limitations & roadmap
 
 - **Schematic body.** The figure is a vector illustration. A photoreal restyle of the rendered keyframes is a possible next step.
-- **Stances.** Split stances (lunges, split squats) are not representable yet. Single-leg work uses a free leg.
+- **Projection.** Side view is a 2D projection: movements that are mostly rotational or diagonal (wood chops, Turkish get-ups) are only approximated, the front view supports upright postures with free weights, cables or lever machines, and transverse-plane machines (pec deck) would need a top view.
 - **Muscle names.** Names coming from the LLM are not normalised to a fixed vocabulary yet.
 - **Render time.** About 4 minutes per variant on a laptop CPU. Renders run two at a time.
 - **Companion app.** The vocabulary still needs mapping to the free-exercise-db format used by the companion fitness app.
