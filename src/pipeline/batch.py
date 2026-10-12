@@ -23,6 +23,7 @@ def initial_state(variant: ExerciseVariant) -> dict:
         "variant": variant,
         "structured_exercise": None,
         "animation_spec": None,
+        "fallback_spec": None,
         "spec_attempts": 0,
         "validation_errors": [],
         "generation_attempts": 0,

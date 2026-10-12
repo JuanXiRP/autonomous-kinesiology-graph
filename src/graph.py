@@ -4,6 +4,7 @@ from typing import Literal
 from src.domain.state import GraphState
 from src.nodes.content_node import generate_exercise_content
 from src.nodes.spec_node import generate_animation_spec
+from src.nodes.critic_node import review_animation_spec
 from src.nodes.render_node import render_exercise_animation
 from src.nodes.storage_node import upload_exercise_media
 from src.nodes.db_node import save_to_database
@@ -31,16 +32,27 @@ def route_after_generation(state: GraphState) -> Literal["content_generator", "s
     # Max retries reached without any exercise data
     return "__end__"
 
-def route_after_spec(state: GraphState) -> Literal["spec_generator", "render_generator", "storage_uploader"]:
+def route_after_spec(state: GraphState) -> Literal["spec_generator", "visual_critic", "render_generator", "storage_uploader"]:
     """
-    Retries the animation spec while it keeps failing validation. When the retries are exhausted
-    the exercise record is still stored, just without media.
+    A geometry-valid spec goes to the visual review. A failing spec is retried; when the retries are exhausted
+    the last spec the reviewer rejected is still rendered, and without any spec the record is stored without media.
     """
+    if state.get("animation_spec"):
+        return "visual_critic"
+    if state.get("spec_attempts", 0) < MAX_ATTEMPTS:
+        return "spec_generator"
+    if state.get("fallback_spec"):
+        return "render_generator"
+    return "storage_uploader"
+
+def route_after_critic(state: GraphState) -> Literal["spec_generator", "render_generator"]:
+    """An approved spec is rendered; a rejected one is regenerated with the review as feedback while attempts
+    remain, otherwise the rejected spec (geometry-valid) is rendered anyway."""
     if state.get("animation_spec"):
         return "render_generator"
     if state.get("spec_attempts", 0) < MAX_ATTEMPTS:
         return "spec_generator"
-    return "storage_uploader"
+    return "render_generator"
 
 # Initialize the state graph
 workflow = StateGraph(GraphState)
@@ -48,6 +60,7 @@ workflow = StateGraph(GraphState)
 # 1. Register all nodes
 workflow.add_node("content_generator", generate_exercise_content)
 workflow.add_node("spec_generator", generate_animation_spec)
+workflow.add_node("visual_critic", review_animation_spec)
 workflow.add_node("render_generator", render_exercise_animation)
 workflow.add_node("storage_uploader", upload_exercise_media)
 workflow.add_node("db_writer", save_to_database)
@@ -71,8 +84,18 @@ workflow.add_conditional_edges(
     route_after_spec,
     {
         "spec_generator": "spec_generator",
+        "visual_critic": "visual_critic",
         "render_generator": "render_generator",
         "storage_uploader": "storage_uploader"
+    }
+)
+
+workflow.add_conditional_edges(
+    "visual_critic",
+    route_after_critic,
+    {
+        "spec_generator": "spec_generator",
+        "render_generator": "render_generator",
     }
 )
 
