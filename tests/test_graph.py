@@ -26,6 +26,22 @@ def test_exercise_goes_to_spec_generation():
     assert route_after_generation(state) == "spec_generator"
 
 
+def test_text_only_exercise_goes_straight_to_the_database():
+    # Arrange
+    state = {"structured_exercise": make_exercise(), "validation_errors": [], "with_media": False}
+
+    # Act / Assert
+    assert route_after_generation(state) == "db_writer"
+
+
+def test_text_only_without_exercise_still_retries_content():
+    # Arrange
+    state = {"structured_exercise": None, "validation_errors": ["boom"], "generation_attempts": 1, "with_media": False}
+
+    # Act / Assert
+    assert route_after_generation(state) == "content_generator"
+
+
 def test_spec_present_goes_to_the_visual_review():
     # Arrange
     state = {"animation_spec": object(), "spec_attempts": 1}
@@ -68,5 +84,6 @@ def test_render_goes_through_storage_before_database():
     assert ("spec_generator", "visual_critic") in edges
     assert ("visual_critic", "render_generator") in edges
     assert ("storage_uploader", "db_writer") in edges
+    assert ("content_generator", "db_writer") in edges  # text-only shortcut
     assert ("render_generator", "db_writer") not in edges
     assert not any("video_generator" in edge or "media_generator" in edge for edge in edges)

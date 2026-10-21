@@ -1,7 +1,8 @@
 from datetime import datetime
 
-from src.cli.prompts import choose_variants, parse_selection, print_options
+from src.cli.prompts import ask_with_media, choose_variants, parse_selection, print_options, print_summary
 from src.domain.models import EquipmentType
+from src.pipeline.batch import VariantResult
 from src.resolution.variants import ExerciseVariant, VariantOptions
 
 
@@ -88,3 +89,26 @@ def test_options_mark_variants_already_in_the_database():
     assert "[ya en BD, 08/10/2026]" in text
     assert text.count("ya en BD") == 1
     assert "Good Morning (Barbell)" in text
+
+
+def test_media_is_off_unless_explicitly_requested():
+    # Arrange / Act / Assert
+    assert ask_with_media(scripted("")) is False
+    assert ask_with_media(scripted("n")) is False
+    assert ask_with_media(scripted("s")) is True
+
+
+def test_summary_marks_text_only_results():
+    # Arrange
+    printed = []
+    variant = options().variants[0]
+    results = [VariantResult(variant, "created", text_only=True),
+               VariantResult(variant, "failed", warnings=["boom"], text_only=True)]
+
+    # Act
+    print_summary(results, printed.append)
+
+    # Assert
+    text = "\n".join(printed)
+    assert "✅ creado (solo texto)" in text
+    assert "❌ falló ·" in text

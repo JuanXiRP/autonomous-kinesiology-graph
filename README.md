@@ -105,6 +105,12 @@ python main.py "peso muerto rumano"
 
 Each generated variant costs three Gemini calls (content, spec, visual review; more when a spec is retried), plus one call for the variant list, and about 4 minutes of local rendering.
 
+After picking the variants the CLI asks whether to also generate the video and still; the default stores **only the text record** (one Gemini call per variant, no rendering, no Supabase Storage keys needed), so the database can be filled first and the media added later. Skip the question with `--solo-texto` or `--con-video`:
+
+```bash
+python main.py --solo-texto "peso muerto rumano"
+```
+
 **Try the renderer without any keys:**
 
 ```bash

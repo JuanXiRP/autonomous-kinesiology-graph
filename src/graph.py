@@ -11,10 +11,10 @@ from src.nodes.db_node import save_to_database
 
 MAX_ATTEMPTS = 3
 
-def route_after_generation(state: GraphState) -> Literal["content_generator", "spec_generator", "__end__"]:
+def route_after_generation(state: GraphState) -> Literal["content_generator", "spec_generator", "db_writer", "__end__"]:
     """
     Evaluates the state after content generation to determine the next step.
-    Implements a self-healing retry loop pattern.
+    Implements a self-healing retry loop pattern. A text-only run skips the media steps entirely.
     """
     errors = state.get("validation_errors", [])
     attempts = state.get("generation_attempts", 0)
@@ -25,9 +25,9 @@ def route_after_generation(state: GraphState) -> Literal["content_generator", "s
         if not state.get("structured_exercise"):
             return "content_generator"
 
-    # If JSON was generated successfully, move to the animation spec node
+    # If JSON was generated successfully, move to the animation spec node (or straight to the DB without media)
     if state.get("structured_exercise"):
-        return "spec_generator"
+        return "spec_generator" if state.get("with_media", True) else "db_writer"
 
     # Max retries reached without any exercise data
     return "__end__"
@@ -75,6 +75,7 @@ workflow.add_conditional_edges(
     {
         "content_generator": "content_generator",
         "spec_generator": "spec_generator",
+        "db_writer": "db_writer",
         "__end__": END
     }
 )

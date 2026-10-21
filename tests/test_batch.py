@@ -64,6 +64,36 @@ def test_one_crash_does_not_stop_the_others():
     assert "boom" in results[0].warnings[0]
 
 
+def test_text_only_run_is_passed_to_the_graph_and_reported_as_created():
+    # Arrange
+    app = FakeApp()
+
+    # Act
+    results = batch.run_variants([variant()], existing=set(), app=app, with_media=False)
+
+    # Assert
+    assert app.calls[0]["with_media"] is False
+    assert results[0].status == "created"
+    assert results[0].text_only
+
+
+def test_text_only_without_video_is_not_reported_as_no_media():
+    # Arrange / Act
+    created = batch.summarize(variant(), {"structured_exercise": make_exercise(), "validation_errors": []},
+                              False, with_media=False)
+    updated = batch.summarize(variant(), {"structured_exercise": make_exercise(), "validation_errors": []},
+                              True, with_media=False)
+
+    # Assert
+    assert (created.status, updated.status) == ("created", "updated")
+
+
+def test_initial_state_requests_media_by_default():
+    # Arrange / Act / Assert
+    assert batch.initial_state(variant())["with_media"] is True
+    assert batch.initial_state(variant(), with_media=False)["with_media"] is False
+
+
 def test_missing_video_is_reported_as_no_media():
     # Arrange
     exercise = make_exercise()

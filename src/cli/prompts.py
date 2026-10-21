@@ -46,6 +46,10 @@ def parse_selection(text: str, count: int) -> list[int] | None:
 def confirm(question: str, input_fn=input) -> bool:
     return input_fn(f"{question} (s/N): ").strip().lower() in YES
 
+def ask_with_media(input_fn=input) -> bool:
+    """Asks whether to also render the video and still; the default (No) stores only the text record."""
+    return confirm("\n¿Generar también vídeo e imagen? (tarda ~4 min por variante; si no, solo texto)", input_fn)
+
 def format_date(value: datetime | None) -> str:
     return value.strftime("%d/%m/%Y") if value else "fecha desconocida"
 
@@ -87,7 +91,8 @@ def choose_variants(options: VariantOptions, existing: dict, db_checked: bool,
 def print_summary(results: list[VariantResult], print_fn=print) -> None:
     print_fn("\n📋 Resumen")
     for result in results:
-        print_fn(f"\n  {STATUS_ES[result.status]} · {result.variant.label_es} ({result.variant.slug})")
+        suffix = " (solo texto)" if result.text_only and result.status != "failed" else ""
+        print_fn(f"\n  {STATUS_ES[result.status]}{suffix} · {result.variant.label_es} ({result.variant.slug})")
         if result.video_url:
             print_fn(f"     Vídeo:  {result.video_url}")
         for url in result.image_urls:
