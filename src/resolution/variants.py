@@ -55,5 +55,5 @@ def resolve_variants(query: str) -> VariantOptions:
     options = structured_llm.invoke([
         SystemMessage(content=SYSTEM_PROMPT),
         HumanMessage(content=f"Request: {query}"),
-    ])
+    ], config={"run_name": "variant-resolver", "metadata": {"query": query}})
     return _dedupe(options)

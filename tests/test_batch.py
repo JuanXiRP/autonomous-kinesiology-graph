@@ -16,12 +16,13 @@ def variant(equipment=EquipmentType.BARBELL) -> ExerciseVariant:
 
 class FakeApp:
     def __init__(self, fail_for=()):
-        self.calls, self.fail_for = [], fail_for
+        self.calls, self.configs, self.fail_for = [], [], fail_for
         self.lock = threading.Lock()
 
-    def invoke(self, state):
+    def invoke(self, state, config=None):
         with self.lock:
             self.calls.append(state)
+            self.configs.append(config)
         variant = state["variant"]
         if variant.slug in self.fail_for:
             raise RuntimeError("boom")
@@ -41,6 +42,20 @@ def test_every_variant_is_invoked_with_its_own_state():
     # Assert
     assert sorted(call["variant"].slug for call in app.calls) == ["romanian_deadlift_barbell", "romanian_deadlift_dumbbell"]
     assert [r.status for r in results] == ["created", "created"]
+
+
+def test_each_run_is_named_after_its_variant_for_tracing():
+    # Arrange
+    app = FakeApp()
+
+    # Act
+    batch.run_variants([variant()], existing=set(), app=app, with_media=False)
+
+    # Assert
+    config = app.configs[0]
+    assert config["run_name"] == "exercise:romanian_deadlift_barbell"
+    assert config["tags"] == ["text_only", "create"]
+    assert config["metadata"]["slug"] == "romanian_deadlift_barbell"
 
 
 def test_existing_variant_is_reported_as_updated():

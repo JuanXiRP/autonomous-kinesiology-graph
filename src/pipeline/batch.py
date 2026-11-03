@@ -47,13 +47,21 @@ def summarize(variant: ExerciseVariant, final_state: dict, existed: bool, with_m
         status = "updated" if existed else "created"
     return VariantResult(variant, status, video, images, errors)
 
+def trace_config(variant: ExerciseVariant, existed: bool, with_media: bool) -> dict:
+    """Names and labels the run so each variant is easy to find in LangSmith (ignored when tracing is off)."""
+    return {
+        "run_name": f"exercise:{variant.slug}",
+        "tags": ["with_media" if with_media else "text_only", "update" if existed else "create"],
+        "metadata": {"slug": variant.slug, "equipment": variant.equipment.value},
+    }
+
 def run_one(app, variant: ExerciseVariant, existed: bool, with_media: bool = True) -> VariantResult:
     # Name the worker thread after the slug so interleaved log lines stay attributable
     threading.current_thread().name = variant.slug
     try:
         mode = "" if with_media else " (text only)"
         logging.info(f"🚀 Starting pipeline for {variant.full_name}{mode}")
-        final_state = app.invoke(initial_state(variant, with_media))
+        final_state = app.invoke(initial_state(variant, with_media), config=trace_config(variant, existed, with_media))
         return summarize(variant, final_state, existed, with_media)
     except Exception as e:  # nodes never raise, but a crash in one variant must not stop the others
         logging.error(f"❌ Pipeline crashed for {variant.slug}: {e}")
