@@ -7,7 +7,7 @@
 ![Gemini](https://img.shields.io/badge/Gemini-structured%20output-4285F4?logo=googlegemini&logoColor=white)
 ![Manim](https://img.shields.io/badge/Manim-rendering-2D6A4F)
 ![Supabase](https://img.shields.io/badge/Supabase-Postgres%20%2B%20Storage-3ECF8E?logo=supabase&logoColor=white)
-![Tests](https://img.shields.io/badge/tests-100%20passing-52B788)
+![Tests](https://img.shields.io/badge/tests-233%20passing-52B788)
 
 <p align="center">
   <img src="docs/demo.gif" alt="Generated technical animation of a dumbbell Romanian deadlift" width="800">
@@ -79,7 +79,7 @@ The key idea: **the LLM does not draw, it describes.** Gemini returns a validate
   - The upsert never replaces a good media URL with an empty one.
   - Every upload is verified by comparing the remote object size with the local file.
 - **Failure isolation.** Graph nodes never raise. They report errors in the state and the graph decides what to do next. One failing variant never stops the others, and the summary says exactly what happened to each one.
-- **Tested offline.** About 200 tests run with every external client (Gemini, Postgres, Storage, Manim) faked, including every sample spec through the geometry checks. Opt-in tests run real renders.
+- **Tested offline.** 233 tests run with every external client (Gemini, Postgres, Storage, Manim) faked, including every sample spec through the geometry checks. 28 opt-in tests run real renders.
 
 ## Tech stack
 
