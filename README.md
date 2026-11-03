@@ -24,6 +24,30 @@
 - **Animates the technique.** It produces a 1280×720 technical video and a still: a side-view anatomical figure with tension-coloured muscles, force vectors, joint angles and step-by-step coaching.
 - **Loads it idempotently.** Media goes to Supabase Storage and the record to Postgres. Each chosen variant is processed in parallel.
 
+## Beyond fitness: the pattern
+
+Exercises are the demo domain, but the problem this project solves is a general one: **LLM output is unreliable exactly where a business needs it to be reliable**, when it has to be stored, rendered or acted on without a person checking every result.
+
+The pipeline applies one reusable pattern:
+
+1. **Understand a loose request.** Free text, typos and ambiguity are turned into concrete, confirmable options.
+2. **Generate structured data, not prose.** The model fills a typed schema instead of writing free-form text.
+3. **Validate against the rules of the domain.** Schema checks first, then domain rules (here: anatomy and physics), then a reviewer model when the rules alone are not enough.
+4. **Feed errors back as concrete fixes.** Failures go back to the model with a precise instruction and a capped number of retries, instead of failing silently.
+5. **Keep the output deterministic.** The LLM describes; plain code renders, calculates and writes. The same input gives the same result, and that code is unit-tested.
+6. **Write safely.** Idempotent upserts, explicit confirmation before overwriting and verified uploads, so a rerun never corrupts existing data.
+
+The same architecture fits any workflow where unstructured input has to become trustworthy data:
+
+| Domain | Loose input | Validated output |
+|---|---|---|
+| E-commerce | Supplier spreadsheets, product descriptions | Catalogue entries with consistent attributes |
+| Back office | Invoices, emails, PDFs | Typed records in the ERP or CRM |
+| Customer onboarding | Intake forms, chat messages | Client profiles and first proposals, approved by a person |
+| Documentation | Notes, specs, tickets | Structured articles and diagrams generated from a spec |
+| Health & fitness | Client goals and constraints | Programmes and exercise content checked against domain rules |
+
+
 ## How it works
 
 ```
